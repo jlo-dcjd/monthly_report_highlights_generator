@@ -197,20 +197,20 @@ if uploaded_file is not None:
     # all refs (types)
     t_for_refs_ct = df.iloc[current_month_fy, 2]
     t_for_refs_prev = df.iloc[prev_month_fy, 2]
-    t_for_refs_pct_chg = round((t_for_refs_ct / t_for_refs_prev) - 1, 2) * 100
+    t_for_refs_pct_chg = math.trunc(round((t_for_refs_ct / t_for_refs_prev) - 1, 2) * 100)
 
     # formal refs (offense)
     fel_refs_all_ct = sum(df2.iloc[current_month_fy, :5].values)
     fel_refs_all_prev = sum(df2.iloc[prev_month_fy, :5].values)
-    fel_refs_all_pct_change = round((fel_refs_all_ct / fel_refs_all_prev) - 1, 2) * 100
+    fel_refs_all_pct_change = math.trunc(round((fel_refs_all_ct / fel_refs_all_prev) - 1, 2) * 100)
 
     mis_refs_all_ct = sum(df2.iloc[current_month_fy, 5:10].values)
     mis_refs_all_prev = sum(df2.iloc[prev_month_fy, 5:10].values)
-    mis_refs_all_pct_change = round((mis_refs_all_ct / mis_refs_all_prev) - 1, 2) * 100
+    mis_refs_all_pct_change = math.trunc(round((mis_refs_all_ct / mis_refs_all_prev) - 1, 2) * 100)
 
     vop_refs_all_ct = (df2.iloc[current_month_fy, 10])
     vop_refs_all_prev = (df2.iloc[prev_month_fy, 10])
-    vop_refs_all_pct_change = round((vop_refs_all_ct / vop_refs_all_prev) - 1, 2) * 100
+    vop_refs_all_pct_change = math.trunc(round((vop_refs_all_ct / vop_refs_all_prev) - 1, 2) * 100)
 
     cins_refs_all_ct = (df2.iloc[current_month_fy, 12])
     cins_refs_all_prev = (df2.iloc[prev_month_fy, 12])
@@ -218,35 +218,35 @@ if uploaded_file is not None:
 
     fel_t_22ytd = sum(df2.iloc[-2, :5].values)
     fel_t_21ytd = sum(df2.iloc[-1, :5].values)
-    fel_t_22ytd_pct_chg = round((fel_t_22ytd / fel_t_21ytd) - 1, 2) * 100
+    fel_t_22ytd_pct_chg = math.trunc(round((fel_t_22ytd / fel_t_21ytd) - 1, 2) * 100)
 
     fel_violent_ct = df2.iloc[-2, 0]
     fel_violent_prev = df2.iloc[-1, 0]
-    fel_violent_22ytd_pct_chg = round((fel_violent_ct / fel_violent_prev) - 1, 2) * 100
+    fel_violent_22ytd_pct_chg = math.trunc(round((fel_violent_ct / fel_violent_prev) - 1, 2) * 100)
 
     fel_drugs_ct = df2.iloc[-2, 2]
     fel_drugs_prev = df2.iloc[-1, 2]
-    fel_drugs_22ytd_pct_chg = round((fel_drugs_ct / fel_drugs_prev) - 1, 2) * 100
+    fel_drugs_22ytd_pct_chg = math.trunc(round((fel_drugs_ct / fel_drugs_prev) - 1, 2) * 100)
 
     fel_weapons_ct = df2.iloc[-2, 3]
     fel_weapons_prev = df2.iloc[-1, 3]
-    fel_weapons_22ytd_pct_chg = round((fel_weapons_ct / fel_weapons_prev) - 1, 2) * 100
+    fel_weapons_22ytd_pct_chg = math.trunc(round((fel_weapons_ct / fel_weapons_prev) - 1, 2) * 100)
 
     mis_t_22ytd = sum(df2.iloc[-2, 5:10].values)
     mis_t_21ytd = sum(df2.iloc[-1, 5:10].values)
-    mis_t_22ytd_pct_chg = round((mis_t_22ytd / mis_t_21ytd) - 1, 2) * 100
+    mis_t_22ytd_pct_chg = math.trunc(round((mis_t_22ytd / mis_t_21ytd) - 1, 2) * 100)
 
     mis_violent_ct = df2.iloc[-2, 5]
     mis_violent_prev = df2.iloc[-1, 5]
-    mis_violent_22ytd_pct_chg = round((mis_violent_ct / mis_violent_prev) - 1, 2) * 100
+    mis_violent_22ytd_pct_chg = math.trunc(round((mis_violent_ct / mis_violent_prev) - 1, 2) * 100)
 
     mis_vop_ct = df2.iloc[-2, 10]
     mis_vop_prev = df2.iloc[-1, 10]
-    mis_vop_22ytd_pct_chg = round((mis_vop_ct / mis_vop_prev) - 1, 2) * 100
+    mis_vop_22ytd_pct_chg = math.trunc(round((mis_vop_ct / mis_vop_prev) - 1, 2) * 100)
 
     status_ct = df2.iloc[-2, 11]
     status_prev = df2.iloc[-1, 11]
-    status_22ytd_pct_chg = round((status_ct / status_prev) - 1, 2) * 100
+    status_22ytd_pct_chg = math.trunc(round((status_ct / status_prev) - 1, 2) * 100)
 
     cins_ct = df2.iloc[-2, 12]
     cins_prev = df2.iloc[-1, 12]
