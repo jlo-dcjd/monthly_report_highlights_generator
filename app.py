@@ -12,8 +12,8 @@ st.title("Monthly Report Generator")
 
 month = st.radio(
      "Select month for the report:",
-     ('Latest Month ({})'.format(fy22[current_month_fy]), 'Previous Month ({})'.format(fy22[prev_month_fy]))
-
+     ('Latest Month ({})'.format(fy22[current_month_fy]), 'Previous Month ({})'.format(fy22[prev_month_fy])))
+       
 if month == 'Latest Month ({})':
     current_month_fy = datetime.now().month + 1
     prev_month_fy = datetime.now().month
