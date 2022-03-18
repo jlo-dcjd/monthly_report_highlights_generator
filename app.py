@@ -10,9 +10,12 @@ fy22 = [('OCT 2021'), ('NOV 2021'), ('DEC 2021'), ('JAN 2022'), ('FEB 2022'), ('
 
 st.title("Monthly Report Generator")
 
+current = fy22[datetime.now().month + 1]
+previous = fy22[datetime.now().month ]
+
 month = st.radio(
      "Select month for the report:",
-     ('Latest Month ({})'.format(fy22[current_month_fy]), 'Previous Month ({})'.format(fy22[prev_month_fy])))
+     ('Latest Month ({})'.format(current), 'Previous Month ({})'.format(previous)))
        
 if month == 'Latest Month ({})':
     current_month_fy = datetime.now().month + 1
