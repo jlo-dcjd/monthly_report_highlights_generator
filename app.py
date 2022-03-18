@@ -15,7 +15,7 @@ previous = fy22[datetime.now().month ]
 
 month = st.radio(
      "Select month for the report:",
-     ('Latest Month ({})'.format(current), 'Previous Month ({})'.format(previous)))
+     ('Latest Month ({})'.format(previous), 'Previous Month ({})'.format(current)))
        
 if month == 'Latest Month ({})':
     current_month_fy = datetime.now().month + 1
