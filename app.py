@@ -12,9 +12,9 @@ st.title("Monthly Report Generator")
 
 month = st.radio(
      "Select month for the report:",
-     ('JAN 2022', 'FEB 2022'))
+     ('Latest Month ({})'.format(fy22[current_month_fy]), 'Previous Month ({})'.format(fy22[prev_month_fy]))
 
-if month == 'FEB 2022':
+if month == 'Latest Month ({})':
     current_month_fy = datetime.now().month + 1
     prev_month_fy = datetime.now().month
     st.write('You selected: report month ({}), previous month ({})'. format(fy22[current_month_fy], fy22[prev_month_fy]))
