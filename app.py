@@ -24,7 +24,7 @@ else:
     st.write('You selected: report month ({}), previous month ({})'. format(fy22[current_month_fy], fy22[prev_month_fy]))
 
 
-uploaded_file = st.file_uploader("Choose a file")
+uploaded_file = st.file_uploader("Upload a monthly report")
 if uploaded_file is not None:
     df = pd.read_excel(uploaded_file, sheet_name=0, skiprows=7, usecols=list(range(1, 17))).T
 
