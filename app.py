@@ -878,7 +878,7 @@ if uploaded_file is not None:
     st.write('\n')
     st.write('***Psych/Clinical Services YTD***')
 
-    for i in range(0, 14):
+    for i in range(0, df12.shape[1]):
         try:
             if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
                 st.write(
