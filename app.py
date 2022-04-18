@@ -84,12 +84,12 @@ if uploaded_file is not None:
     df5.columns = np.append(dis_col, header.values[0][-6])
 
     # sealings
-    df6 = pd.read_excel(uploaded_file, sheet_name=2, skiprows=33, usecols=list(range(1, 17))).T
+    df6 = pd.read_excel(uploaded_file, sheet_name=2, usecols=list(range(1, 17))).T
 
-    header = df6.iloc[:2]
-    df6 = df6.iloc[2:, :]
-    df6.columns = header.values[0]
-
+    df6 = df6.iloc[2:, np.where(df6.iloc[0] == 'Sealings')[0][0]: ]
+    df6.columns = ['Month', 'Sealings']
+    df6 = df6.set_index('Month')
+       
     # detention
     df7 = pd.read_excel(uploaded_file, sheet_name=3, skiprows=4, usecols=list(range(1, 18))).T
 
