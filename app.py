@@ -170,8 +170,8 @@ if uploaded_file is not None:
     df12 = pd.read_excel(uploaded_file, sheet_name=9, skiprows=6, usecols=list(range(1, 16))).T
 
     header = df12.iloc[0]
-    df12 = df12.iloc[1:, :14]
-    df12.columns = header.values[:14]
+    df12 = df12.iloc[1:, : np.where(header.values == 'Total')[0][0]+1]
+    df12.columns = header.values[:np.where(header.values == 'Total')[0][0]+1]
 
     # Behavioral Health
     df13 = pd.read_excel(
@@ -629,7 +629,7 @@ if uploaded_file is not None:
         pass
 
     st.write('\n')
-    st.write('***Caseloads YTD***')
+    st.title('***Caseloads YTD***')
     st.write('\n')
 
     try:
@@ -654,7 +654,7 @@ if uploaded_file is not None:
         pass
 
     st.write('\n')
-    st.write('***Supervision MTM***')
+    st.title('***Supervision MTM***')
     st.write('\n')
 
     try:
@@ -681,7 +681,7 @@ if uploaded_file is not None:
         pass
 
     st.write('\n')
-    st.write('***Supervision YTD***')
+    st.title('***Supervision YTD***')
     st.write('\n')
 
     try:
@@ -706,7 +706,7 @@ if uploaded_file is not None:
         pass
 
     st.write('\n')
-    st.write('***Internal Placement ADP MTM***')
+    st.title('***Internal Placement ADP MTM***')
     st.write('\n')
 
     for i in range(7, 28, 9):
@@ -792,7 +792,7 @@ if uploaded_file is not None:
             pass
 
     st.write('\n')
-    st.write('***Internal Placement ADP YTD***')
+    st.title('***Internal Placement ADP YTD***')
     st.write('\n')
 
     for i in range(7, 28, 9):
