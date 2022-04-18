@@ -37,9 +37,9 @@ if uploaded_file is not None:
     st.write(df)
 
     # Formalized Referrals
-    col = ['F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
-           'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
-           'O CINS Other than Status', 'O Other']
+    col = ['Month', 'F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
+       'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
+       'O CINS Other than Status', 'O Other', 'Total Formalized Referrals']
 
     df2 = pd.read_excel(uploaded_file, sheet_name=0, usecols=list(range(1, 17))).T
 
