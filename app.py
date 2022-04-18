@@ -404,7 +404,7 @@ if uploaded_file is not None:
 
     # court hearing
     st.write('\n')
-    st.write('***Court Hearings***')
+    st.title('***Court Hearings***')
     st.write('\n')
 
     st.write('Compared to the first {} months of FY2021,'.format(current_month_fy + 1))
@@ -440,7 +440,7 @@ if uploaded_file is not None:
                 court_hear_reset_fy22, court_hear_reset_fy21, current_month_fy + 1))
 
     st.write('\n')
-    st.write('***Dispositions, Sealings***')
+    st.title('***Dispositions, Sealings***')
     st.write('\n')
 
     if def_pros_pct_chg_mtm > 0:
@@ -478,7 +478,7 @@ if uploaded_file is not None:
                                                                                       seals_fy22ytd))
 
     st.write('\n')
-    st.write('***Detention***')
+    st.title('***Detention***')
     st.write('\n')
 
     st.write('month-to-month total'.upper())
@@ -602,7 +602,7 @@ if uploaded_file is not None:
 
     # Caseloads
     st.write('\n')
-    st.write('***Caseloads MTM***')
+    st.title('***Caseloads MTM***')
     st.write('\n')
 
     try:
@@ -834,7 +834,7 @@ if uploaded_file is not None:
             pass
 
     st.write('\n')
-    st.write('***Contract Placement***')
+    st.title('***Contract Placement***')
     st.write('\n')
 
     st.write('({}) youth were served at contract placement facilities in {}.'.format(df11.iloc[current_month_fy, 0],
