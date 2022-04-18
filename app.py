@@ -45,7 +45,8 @@ if uploaded_file is not None:
 
     df2 = df2.iloc[2:, np.where(df2.iloc[0] == 'Formalized Referrals')[0][0]+1: np.where(df2.iloc[0] == 'Total Formalized Referrals')[0][1]+1]
     df2.columns = col
-
+    df2 = df2.set_index('Month')
+       
     # monthly court hearings
     df3 = pd.read_excel(uploaded_file, sheet_name=1, skiprows=6, usecols=list(range(1, 17))).T
 
