@@ -317,7 +317,7 @@ if uploaded_file is not None:
     det_t_adp_prev = round(df7.iloc[prev_month_fy, -3], 0)
     det_t_adp_pct_chg_mtm = math.trunc(round((det_t_adp_ct / det_t_adp_prev) - 1, 2) * 100)
 
-    st.write('***Referrals***')
+    st.title('***Referrals***')
     st.write('\n')
 
     if t_for_refs_pct_chg > 0:
