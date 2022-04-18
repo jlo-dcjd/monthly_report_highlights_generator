@@ -29,10 +29,11 @@ else:
 
 uploaded_file = st.file_uploader("Upload a monthly report")
 if uploaded_file is not None:
+    
+    # referrals
     df = pd.read_excel(uploaded_file, sheet_name=0, skiprows=7, usecols=list(range(1, 17))).T
-
     df.columns = df.iloc[0]
-    df = df.iloc[2:, :9]
+    df = df.iloc[2:, :np.where(df.iloc[0] == 'Total All Referrals')[0][0]+1]
     st.write(df)
 
     # Formalized Referrals
@@ -42,7 +43,7 @@ if uploaded_file is not None:
 
     df2 = pd.read_excel(uploaded_file, sheet_name=0, skiprows=20, usecols=list(range(1, 17))).T
 
-    df2 = df2.iloc[2:, :14]
+    df2 = df2.iloc[2:, np.where(df2.iloc[0] == 'Formalized Referrals')[0][0]+1: np.where(df2.iloc[0] == 'Total Formalized Referrals')[0][1]+1]
     df2.columns = col
 
     # monthly court hearings
@@ -253,8 +254,8 @@ if uploaded_file is not None:
     cins_22ytd_pct_chg = math.trunc(round((cins_ct / cins_prev) - 1, 2) * 100)
 
     # court hearings
-    t_court_hearings_ct = df3.iloc[-2, 6]
-    t_court_hearings_prev = df3.iloc[-1, 6]
+    t_court_hearings_ct = df3.iloc[-2, df3.columns.get_loc("Total Held Detention Hearings")]
+    t_court_hearings_prev= df3.iloc[-1, df3.columns.get_loc("Total Held Detention Hearings")]
     t_court_hearings_22ytd_pct_chg = math.trunc(round((cins_ct / cins_prev) - 1, 2) * 100)
 
     court_hear_reset_fy22 = math.trunc(round(df4.iloc[-2, -1], 2) * 100)
@@ -330,24 +331,24 @@ if uploaded_file is not None:
     st.write(' ')
     st.write('Compared to the previous month, ')
     if fel_refs_all_pct_change > 0:
-        st.write('   felony referrals increased by {}%'.format(fel_refs_all_pct_change))
+        st.write('• Felony referrals increased by {}% ({} vs. {})'.format(fel_refs_all_pct_change, fel_refs_all_ct, fel_refs_all_prev))
     else:
-        st.write('   felony referrals decrease by {}%'.format(fel_refs_all_pct_change))
+        st.write('• Felony referrals decreased by {}% ({} vs. {})'.format(fel_refs_all_pct_change, fel_refs_all_ct, fel_refs_all_prev))
 
     if mis_refs_all_pct_change > 0:
-        st.write('   misdemeanor referrals increased by {}%'.format(mis_refs_all_pct_change))
+        st.write('• Misdemeanor referrals increased by {}% ({} vs. {})'.format(mis_refs_all_pct_change, mis_refs_all_ct, mis_refs_all_prev))
     else:
-        st.write('   misdemeanor referrals decrease by {}%'.format(mis_refs_all_pct_change))
+        st.write('• Misdemeanor referrals decreased by {}% ({} vs. {})'.format(mis_refs_all_pct_change, mis_refs_all_ct, mis_refs_all_prev))
 
     if vop_refs_all_pct_change > 0:
-        st.write('   VOPs referrals increased by {}%'.format(vop_refs_all_pct_change))
+        st.write('• VOPs referrals increased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
     else:
-        st.write('   VOPs referrals decrease by {}%'.format(vop_refs_all_pct_change))
+        st.write('• VOPs referrals decreased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
 
     if cins_refs_all_pct_change > 0:
-        st.write('   CINS referrals increased by {}%'.format(cins_refs_all_pct_change))
+        st.write('• CINS referrals increased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
     else:
-        st.write('   CINS referrals decrease by {}%'.format(cins_refs_all_pct_change))
+        st.write('• CINS referrals decreased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
 
     st.write(' ')
 
