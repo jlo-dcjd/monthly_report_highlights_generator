@@ -174,7 +174,7 @@ if uploaded_file is not None:
     df12.columns = header.values[:np.where(header.values == 'Total')[0][0]+1]
 
     # Behavioral Health
-    df13 = pd.read_excel(uploaded_file, sheet_name=9, skiprows=23).T
+    df13 = pd.read_excel(uploaded_file, sheet_name=9).T
 
     df13.columns = df13.iloc[1]
     df13 = df13.iloc[:, :-1]
