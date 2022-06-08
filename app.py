@@ -174,20 +174,22 @@ if uploaded_file is not None:
     df12.columns = header.values[:np.where(header.values == 'Total')[0][0]+1]
 
     # Behavioral Health
-    df13 = pd.read_excel(
-        uploaded_file,
-        sheet_name=9, skiprows=23, usecols=list(range(1, 16))).T
+    df13 = pd.read_excel(uploaded_file, sheet_name=9, skiprows=23).T
 
-    header = df13.iloc[0]
-    df13 = df13.iloc[1:, :8]
-    df13.columns = header.values[:8]
+    df13.columns = df13.iloc[1]
+    df13 = df13.iloc[:, :-1]
+    df13 = df13.iloc[2:, np.where(df13.iloc[1] == 'Behavioral Health Services Referrals')[0][0]+1: np.where(df13.iloc[1] == 'Total')[0][1]+1]
+    df13 = df13.set_index('Referred For')
+    df13 = df13.loc[:'FY21 YTD Total', :]
 
     # Clinical Service Referral Outcomes
-    df14 = pd.read_excel(uploaded_file, sheet_name=9, skiprows=34, usecols=list(range(1, 16))).T
+    df14 = pd.read_excel(uploaded_file, sheet_name=9).T
 
-    header = df14.iloc[0]
-    df14 = df14.iloc[1:, :2]
-    df14.columns = header.values[:2]
+    df14.columns = df14.iloc[1]
+    df14 = df14.iloc[:, :-1]
+    df14 = df14.iloc[2:, np.where(df14.iloc[1] == 'Clinical Service Referral Outcomes')[0][0]+1: np.where(df14.iloc[1] == 'Behavioral Health Services Referrals Completed')[0][0]+1]
+    df14 = df14.set_index('Referral Type')
+    df14 = df14.loc[:'FY21 YTD Total', :]
     
     # education
     df15 = pd.read_excel(uploaded_file, sheet_name=10, skiprows=4, usecols=list(range(2, 18))).T
@@ -902,7 +904,7 @@ if uploaded_file is not None:
     st.write('\n')
     st.write('***Psych/Behavioral Health Services Referrals MTM***')
 
-    for i in range(0, 8):
+    for i in range(0, df13.shape[1]):
         try:
 
             if (df13.iloc[current_month_fy, i] / df13.iloc[current_month_fy, i]) - 1 > 0:
@@ -929,7 +931,7 @@ if uploaded_file is not None:
     st.write('\n')
     st.write('***Psych/Behavioral Health Services Referrals YTD***')
 
-    for i in range(0, 8):
+    for i in range(0, df13.shape[1]):
         try:
 
             if (df13.iloc[-2, i] / df13.iloc[-1, i]) - 1 > 0:
