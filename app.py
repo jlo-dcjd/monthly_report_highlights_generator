@@ -40,11 +40,19 @@ if uploaded_file is not None:
     col = ['Month', 'F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
        'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
        'O CINS Other than Status', 'O Other', 'Total Formalized Referrals']
+       
+    col_alt = ['Month', 'F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
+       'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
+       'O CINS Other than Status', 'Total Formalized Referrals']
 
     df2 = pd.read_excel(uploaded_file, sheet_name=0, usecols=list(range(1, 17))).T
 
     df2 = df2.iloc[2:, np.where(df2.iloc[0] == 'Formalized Referrals')[0][0]+1: np.where(df2.iloc[0] == 'Total Formalized Referrals')[0][1]+1]
-    df2.columns = col
+    if df2.shape[1] == 15:
+        df2.columns = col_alt
+    if df2.shape[1] == 16:
+        df2.columns = col
+              
     df2 = df2.set_index('Month')
        
     # monthly court hearings
