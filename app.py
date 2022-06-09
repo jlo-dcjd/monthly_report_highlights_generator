@@ -670,6 +670,7 @@ if uploaded_file is not None:
     st.write('Caseloads MTM Percent Change -  Decreases')
     st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
+       
     st.write('\n')
     st.title('***Caseloads YTD***')
     st.write('\n')
@@ -718,7 +719,10 @@ if uploaded_file is not None:
                 cl_name2.append(df8.columns[i])
                 cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
     except:
-        pass       
+        pass 
+       
+    caseload_dict2 ['Caseload Name'] = cl_name2
+    caseload_dict2 ['Caseload Perc. Change (YTD)'] = cl_perc2  
        
     # YTD
     cls2 = pd.DataFrame(caseload_dict2).sort_values(by='Caseload Perc. Change (YTD)', ascending=False)
