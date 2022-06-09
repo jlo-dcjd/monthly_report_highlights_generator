@@ -646,8 +646,8 @@ if uploaded_file is not None:
                                                                                                  (round(df8.iloc[prev_month_fy, i], 1))))
                    cl_name.append(df8.columns[i])
                    cl_perc.append((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1)
-        else:
-            st.write('The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
+            else:
+                st.write('The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
                                                                                           math.trunc(round((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
                                                                                           fy22[current_month_fy], 
                                                                                           fy22[prev_month_fy],                                         
