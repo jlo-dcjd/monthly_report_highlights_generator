@@ -805,7 +805,7 @@ if uploaded_file is not None:
     for i in range(7, 107, 9):
         try:
             if (df10.iloc[-2, i] / df10.iloc[-1, i]) - 1 > 0:
-                print('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
+                st.write('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
                                                                                           math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
                                                                                           fy22[current_month_fy],
                                                                                           (round(df10.iloc[-2, i], 1)), 
@@ -814,7 +814,7 @@ if uploaded_file is not None:
                 pl_perc2.append((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1)
             
             else:
-                print('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
+                st.write('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
                                                                                           math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
                                                                                           fy22[current_month_fy],
                                                                                           (round(df10.iloc[-2, i], 1)), 
