@@ -702,21 +702,21 @@ if uploaded_file is not None:
     try:
        for i in range(0, 18):
             if (df8.iloc[-2, i] / df8.iloc[-1, i]) - 1 > 0:
-            st.write('The daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
+                st.write('The daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
                                                                                           math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
                                                                                           fy22[current_month_fy], 
                                                                                           (round(df8.iloc[-2, i], 1)), 
                                                                                           (round(df8.iloc[-1, i], 1))))
-            cl_name2.append(df8.columns[i])
-            cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
+                cl_name2.append(df8.columns[i])
+                cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
             else:
-            st.write('The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
+                st.write('The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
                                                                                           math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
                                                                                           fy22[current_month_fy], 
                                                                                           (round(df8.iloc[-2, i], 1)), 
                                                                                           (round(df8.iloc[-1, i], 1))))
-            cl_name2.append(df8.columns[i])
-            cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
+                cl_name2.append(df8.columns[i])
+                cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
     except:
         pass       
        
@@ -729,6 +729,7 @@ if uploaded_file is not None:
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
        
 
+       
     st.write('\n')
     st.title('***Supervision MTM***')
     st.write('\n')
