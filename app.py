@@ -606,54 +606,128 @@ if uploaded_file is not None:
     st.write('\n')
     st.title('***Caseloads MTM***')
     st.write('\n')
+    
+    caseload_dict = {}
+    cl_name = []
+    cl_perc = []
 
+
+#     try:
+#         for i in range(0, 18):
+#             if (df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1 > 0:
+#                 st.write(
+#                     'The average daily officer caseloads for the {} unit increased by {}% in {}, compared to {} ({} vs. {})'.format(
+#                         df8.columns[i],
+#                         math.trunc(round((df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
+#                         fy22[current_month_fy],
+#                         fy22[prev_month_fy],
+#                         math.trunc(round(df8.iloc[current_month_fy, i], 2)),
+#                         math.trunc(round(df8.iloc[prev_month_fy, i], 2))))
+#             else:
+#                 st.write(
+#                     'The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(
+#                         df8.columns[i],
+#                         math.trunc(round((df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
+#                         fy22[current_month_fy],
+#                         fy22[prev_month_fy],
+#                         math.trunc(round(df8.iloc[current_month_fy, i], 2)),
+#                         math.trunc(round(df8.iloc[prev_month_fy, i], 2))))
+#     except:
+#         pass
+       
     try:
         for i in range(0, 18):
             if (df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write(
-                    'The average daily officer caseloads for the {} unit increased by {}% in {}, compared to {} ({} vs. {})'.format(
-                        df8.columns[i],
-                        math.trunc(round((df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
-                        fy22[prev_month_fy],
-                        math.trunc(round(df8.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df8.iloc[prev_month_fy, i], 2))))
-            else:
-                st.write(
-                    'The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(
-                        df8.columns[i],
-                        math.trunc(round((df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
-                        fy22[prev_month_fy],
-                        math.trunc(round(df8.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df8.iloc[prev_month_fy, i], 2))))
+                   st.write('The average daily officer caseloads for the {} unit increased by {}% in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
+                                                                                                 math.trunc(round((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
+                                                                                                 fy22[current_month_fy], 
+                                                                                                 fy22[prev_month_fy],                                         
+                                                                                                 (round(df8.iloc[current_month_fy, i], 1)), 
+                                                                                                 (round(df8.iloc[prev_month_fy, i], 1))))
+                   cl_name.append(df8.columns[i])
+                   cl_perc.append((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1)
+        else:
+            st.write('The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
+                                                                                          math.trunc(round((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy], 
+                                                                                          fy22[prev_month_fy],                                         
+                                                                                          (round(df8.iloc[current_month_fy, i], 1)), 
+                                                                                          (round(df8.iloc[prev_month_fy, i], 1))))
+            cl_name.append(df8.columns[i])
+            cl_perc.append((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1)
+
     except:
         pass
+
+    caseload_dict ['Caseload Name'] = cl_name
+    caseload_dict ['Caseload Perc. Change (MTM)'] = cl_perc
+       
+    # MTM
+    cls = pd.DataFrame(caseload_dict).sort_values(by='Caseload Perc. Change (MTM)', ascending=False)
+    st.write('Caseloads MTM Percent Change - Increases')
+    st.write(cls[cls['Caseload Perc. Change (MTM)'] > 0].style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
+
+    st.write('Caseloads MTM Percent Change -  Decreases')
+    st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
     st.write('\n')
     st.title('***Caseloads YTD***')
     st.write('\n')
 
+    caseload_dict2 = {}
+    cl_name2 = []
+    cl_perc2 = []
+
+#     try:
+#         for i in range(0, 18):
+#             if (df8.iloc[-2, i] / df8.iloc[-1, i]) - 1 > 0:
+#                 st.write(
+#                     'The  daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
+#                         df8.columns[i],
+#                         math.trunc(round((df8.iloc[-2, i] / df8.iloc[-1, i]) - 1, 2) * 100),
+#                         fy22[current_month_fy],
+#                         math.trunc(round(df8.iloc[-2, i], 2)),
+#                         math.trunc(round(df8.iloc[-1, i], 2))))
+#             else:
+#                 st.write(
+#                     'The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
+#                         df8.columns[i],
+#                         math.trunc(round((df8.iloc[-2, i] / df8.iloc[-1, i]) - 1, 2) * 100),
+#                         fy22[current_month_fy],
+#                         math.trunc(round(df8.iloc[-2, i], 2)),
+#                         math.trunc(round(df8.iloc[-1, i], 2))))
+#     except:
+#         pass
+       
     try:
-        for i in range(0, 18):
+       for i in range(0, 18):
             if (df8.iloc[-2, i] / df8.iloc[-1, i]) - 1 > 0:
-                st.write(
-                    'The  daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                        df8.columns[i],
-                        math.trunc(round((df8.iloc[-2, i] / df8.iloc[-1, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
-                        math.trunc(round(df8.iloc[-2, i], 2)),
-                        math.trunc(round(df8.iloc[-1, i], 2))))
+            st.write('The daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
+                                                                                          math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy], 
+                                                                                          (round(df8.iloc[-2, i], 1)), 
+                                                                                          (round(df8.iloc[-1, i], 1))))
+            cl_name2.append(df8.columns[i])
+            cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
             else:
-                st.write(
-                    'The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                        df8.columns[i],
-                        math.trunc(round((df8.iloc[-2, i] / df8.iloc[-1, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
-                        math.trunc(round(df8.iloc[-2, i], 2)),
-                        math.trunc(round(df8.iloc[-1, i], 2))))
+            st.write('The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
+                                                                                          math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy], 
+                                                                                          (round(df8.iloc[-2, i], 1)), 
+                                                                                          (round(df8.iloc[-1, i], 1))))
+            cl_name2.append(df8.columns[i])
+            cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
     except:
-        pass
+        pass       
+       
+    # YTD
+    cls2 = pd.DataFrame(caseload_dict2).sort_values(by='Caseload Perc. Change (YTD)', ascending=False)
+    st.write('Caseloads MTM Percent Change - Increases')
+    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] > 0].style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
+
+    st.write('Caseloads MTM Percent Change -  Decreases')
+    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
+       
 
     st.write('\n')
     st.title('***Supervision MTM***')
