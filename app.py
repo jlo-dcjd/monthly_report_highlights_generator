@@ -642,10 +642,10 @@ if uploaded_file is not None:
     # MTM
     cls = pd.DataFrame(caseload_dict).sort_values(by='Caseload Perc. Change (MTM)', ascending=False)
     st.write('Caseloads MTM Percent Change - Increases')
-    st.write(cls[cls['Caseload Perc. Change (MTM)'] > 0].style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
+    st.write(cls[cls['Caseload Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
     st.write('Caseloads MTM Percent Change -  Decreases')
-    st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
+    st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
        
     st.write('\n')
@@ -684,10 +684,10 @@ if uploaded_file is not None:
     # YTD
     cls2 = pd.DataFrame(caseload_dict2).sort_values(by='Caseload Perc. Change (YTD)', ascending=False)
     st.write('Caseloads YTD Percent Change - Increases')
-    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] > 0].style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
+    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
 
     st.write('Caseloads YTD Percent Change -  Decreases')
-    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
+    st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
        
 
        
