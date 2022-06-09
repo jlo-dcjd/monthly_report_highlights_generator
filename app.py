@@ -648,10 +648,10 @@ if uploaded_file is not None:
        
     # MTM
     cls = pd.DataFrame(caseload_dict).sort_values(by='Caseload Perc. Change (MTM)', ascending=False)
-    st.write('Caseloads MTM Percent Change - Increases')
+    st.subheader('Caseloads MTM Percent Change - Increases')
     st.write(cls[cls['Caseload Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
-    st.write('Caseloads MTM Percent Change -  Decreases')
+    st.subheader('Caseloads MTM Percent Change -  Decreases')
     st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
        
@@ -690,10 +690,10 @@ if uploaded_file is not None:
        
     # YTD
     cls2 = pd.DataFrame(caseload_dict2).sort_values(by='Caseload Perc. Change (YTD)', ascending=False)
-    st.write('Caseloads YTD Percent Change - Increases')
+    st.subheader('Caseloads YTD Percent Change - Increases')
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
 
-    st.write('Caseloads YTD Percent Change -  Decreases')
+    st.subheader('Caseloads YTD Percent Change -  Decreases')
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
        
 
@@ -787,9 +787,9 @@ if uploaded_file is not None:
     int_pl_dict ['Placement Perc. Change (MTM)'] = pl_perc     
     # MTM
     int_pl = pd.DataFrame(int_pl_dict).sort_values(by='Placement Perc. Change (MTM)', ascending=False)
-    st.write('Internal Placement ADP MTM - Increases')
+    st.subheader('Internal Placement ADP MTM - Increases')
     st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
-    st.write('Internal Placement ADP MTM - Decreases')
+    st.subheader('Internal Placement ADP MTM - Decreases')
     st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] < 0].sort_values(by='Placement Perc. Change (MTM)').reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
        
        
@@ -830,9 +830,9 @@ if uploaded_file is not None:
 
     # YTD
     int_pl2 = pd.DataFrame(int_pl_dict2).sort_values(by='Placement Perc. Change (YTD)', ascending=False)
-    st.write('Internal Placement ADP YTD - Increases')
+    st.subheader('Internal Placement ADP YTD - Increases')
     st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
-    st.write('Internal Placement ADP YTD - Decreases')
+    st.subheader('Internal Placement ADP YTD - Decreases')
     st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] < 0].sort_values(by='Placement Perc. Change (YTD)').reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
 
 
