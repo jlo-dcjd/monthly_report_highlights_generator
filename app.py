@@ -139,6 +139,13 @@ if uploaded_file is not None:
     col_list.remove("Letot Intake: Completion %")
     df10.columns = col_list
 
+    letot_in_ph = np.where(df10.columns == df10.filter(like='Letot Intake: Total Exits').columns[0])[0][0]
+
+    df10.insert(int(letot_in_ph + 1), "Dummy 1", 9999)
+    df10.insert(int(letot_in_ph + 2), "Dummy 2", 9999)
+    df10.insert(int(letot_in_ph + 3), "Dummy 3", 9999)
+    df10.insert(int(letot_in_ph + 4), "Dummy 4", 9999)
+
     # internal placement
     df11 = pd.read_excel(uploaded_file, sheet_name=7, skiprows=3, usecols=list(range(1, 18))).T
 
@@ -747,129 +754,87 @@ if uploaded_file is not None:
     st.title('***Internal Placement ADP MTM***')
     st.write('\n')
 
-    for i in range(7, 28, 9):
+    int_pl_dict = {}
+    pl_name = []
+    pl_perc = []
+
+    for i in range(7, 107, 9):
         try:
             if (df10.iloc[current_month_fy, i] / df10.iloc[prev_month_fy, i]) - 1 > 0:
                 st.write('The ADP for {} increased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                                 math.trunc(round((
-                                                                                                                              df10.iloc[
-                                                                                                                                  current_month_fy, i] /
-                                                                                                                              df10.iloc[
-                                                                                                                                  prev_month_fy, i]) - 1,
-                                                                                                                  2) * 100),
-                                                                                                 fy22[current_month_fy],
-                                                                                                 fy22[prev_month_fy],
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         current_month_fy, i],
-                                                                                                     2)),
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         prev_month_fy, i],
-                                                                                                     2))))
+                                                                                          math.trunc(round((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy],
+                                                                                          fy22[prev_month_fy],
+                                                                                          (round(df10.iloc[current_month_fy, i], 1)), 
+                                                                                          (round(df10.iloc[prev_month_fy, i], 1))))
+                pl_name.append(df10.columns[i])
+                pl_perc.append((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1)
+            
             else:
                 st.write('The ADP for {} decreased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                                 math.trunc(round((
-                                                                                                                              df10.iloc[
-                                                                                                                                  current_month_fy, i] /
-                                                                                                                              df10.iloc[
-                                                                                                                                  prev_month_fy, i]) - 1,
-                                                                                                                  2) * 100),
-                                                                                                 fy22[current_month_fy],
-                                                                                                 fy22[prev_month_fy],
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         current_month_fy, i],
-                                                                                                     2)),
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         prev_month_fy, i],
-                                                                                                     2))))
+                                                                                          math.trunc(round((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy],
+                                                                                          fy22[prev_month_fy],
+                                                                                          (round(df10.iloc[current_month_fy, i], 1)), 
+                                                                                          (round(df10.iloc[prev_month_fy, i], 1))))
+                pl_name.append(df10.columns[i])
+                pl_perc.append((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1)
+            
         except:
             pass
-
-    for i in range(39, 86, 9):
-        try:
-            if (df10.iloc[current_month_fy, i] / df10.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write('The ADP for {} increased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                                 math.trunc(round((
-                                                                                                                              df10.iloc[
-                                                                                                                                  current_month_fy, i] /
-                                                                                                                              df10.iloc[
-                                                                                                                                  prev_month_fy, i]) - 1,
-                                                                                                                  2) * 100),
-                                                                                                 fy22[current_month_fy],
-                                                                                                 fy22[prev_month_fy],
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         current_month_fy, i],
-                                                                                                     2)),
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         prev_month_fy, i],
-                                                                                                     2))))
-            else:
-                st.write('The ADP for {} decreased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                                 math.trunc(round((
-                                                                                                                              df10.iloc[
-                                                                                                                                  current_month_fy, i] /
-                                                                                                                              df10.iloc[
-                                                                                                                                  prev_month_fy, i]) - 1,
-                                                                                                                  2) * 100),
-                                                                                                 fy22[current_month_fy],
-                                                                                                 fy22[prev_month_fy],
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         current_month_fy, i],
-                                                                                                     2)),
-                                                                                                 math.trunc(round(
-                                                                                                     df10.iloc[
-                                                                                                         prev_month_fy, i],
-                                                                                                     2))))
-        except:
-            pass
-
+       
+    int_pl_dict ['Placement'] = pl_name
+    int_pl_dict ['Placement Perc. Change (MTM)'] = pl_perc     
+    # MTM
+    int_pl = pd.DataFrame(int_pl_dict).sort_values(by='Placement Perc. Change (MTM)', ascending=False)
+    st.write('Internal Placement ADP MTM - Increases')
+    st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
+    st.write('Internal Placement ADP MTM - Decreases')
+    st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] < 0].sort_values(by='Placement Perc. Change (MTM)').reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
+       
+       
+       
     st.write('\n')
     st.title('***Internal Placement ADP YTD***')
     st.write('\n')
 
-    for i in range(7, 28, 9):
+    int_pl_dict2 = {}
+    pl_name2 = []
+    pl_perc2 = []
+
+    for i in range(7, 107, 9):
         try:
             if (df10.iloc[-2, i] / df10.iloc[-1, i]) - 1 > 0:
-                st.write('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                    df10.columns[i],
-                    math.trunc(round((df10.iloc[-2, i] / df10.iloc[-1, i]) - 1, 2) * 100),
-                    fy22[current_month_fy],
-                    math.trunc(round(df10.iloc[-2, i], 2)),
-                    math.trunc(round(df10.iloc[-1, i], 2))))
+                print('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
+                                                                                          math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy],
+                                                                                          (round(df10.iloc[-2, i], 1)), 
+                                                                                          (round(df10.iloc[-1, i], 1))))
+                pl_name2.append(df10.columns[i])
+                pl_perc2.append((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1)
+            
             else:
-                st.write('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                    df10.columns[i],
-                    math.trunc(round((df10.iloc[-2, i] / df10.iloc[-1, i]) - 1, 2) * 100),
-                    fy22[current_month_fy],
-                    math.trunc(round(df10.iloc[-2, i], 2)),
-                    math.trunc(round(df10.iloc[-1, i], 2))))
+                print('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
+                                                                                          math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
+                                                                                          fy22[current_month_fy],
+                                                                                          (round(df10.iloc[-2, i], 1)), 
+                                                                                          (round(df10.iloc[-1, i], 1))))
+                pl_name2.append(df10.columns[i])
+                pl_perc2.append((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1)
+            
         except:
             pass
 
-    for i in range(39, 86, 9):
-        try:
-            if (df10.iloc[-2, i] / df10.iloc[-1, i]) - 1 > 0:
-                st.write('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                    df10.columns[i],
-                    math.trunc(round((df10.iloc[-2, i] / df10.iloc[-1, i]) - 1, 2) * 100),
-                    fy22[current_month_fy],
-                    math.trunc(round(df10.iloc[-2, i], 2)),
-                    math.trunc(round(df10.iloc[-1, i], 2))))
-            else:
-                st.write('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
-                    df10.columns[i],
-                    math.trunc(round((df10.iloc[-2, i] / df10.iloc[-1, i]) - 1, 2) * 100),
-                    fy22[current_month_fy],
-                    math.trunc(round(df10.iloc[-2, i], 2)),
-                    math.trunc(round(df10.iloc[-1, i], 2))))
-        except:
-            pass
+    int_pl_dict2 ['Placement Name'] = pl_name2
+    int_pl_dict2 ['Placement Perc. Change (YTD)'] = pl_perc2
+
+    # YTD
+    int_pl2 = pd.DataFrame(int_pl_dict2).sort_values(by='Placement Perc. Change (YTD)', ascending=False)
+    st.write('Internal Placement ADP YTD - Increases')
+    st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
+    st.write('Internal Placement ADP YTD - Decreases')
+    st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] < 0].sort_values(by='Placement Perc. Change (YTD)').reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
+
 
     st.write('\n')
     st.title('***Contract Placement***')
