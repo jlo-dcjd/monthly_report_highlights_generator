@@ -235,6 +235,10 @@ if uploaded_file is not None:
     cins_refs_all_prev = (df2.iloc[prev_month_fy, 12])
     cins_refs_all_pct_change = math.trunc(round((cins_refs_all_ct / cins_refs_all_prev) - 1, 2) * 100)
 
+    stat_refs_all_ct = (df2.iloc[current_month_fy, 11])
+    stat_refs_all_prev = (df2.iloc[prev_month_fy, 11])
+    stat_refs_all_pct_change = math.trunc(round((cins_refs_all_ct / cins_refs_all_prev) - 1, 2) * 100)
+
     fel_t_22ytd = sum(df2.iloc[-2, :5].values)
     fel_t_21ytd = sum(df2.iloc[-1, :5].values)
     fel_t_22ytd_pct_chg = math.trunc(round((fel_t_22ytd / fel_t_21ytd) - 1, 2) * 100)
@@ -363,6 +367,13 @@ if uploaded_file is not None:
     else:
         st.write('• VOPs referrals decreased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
 
+    if stat_refs_all_pct_change > 0:
+        st.write('• CINS referrals increased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
+    else:
+        st.write('• CINS referrals decreased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
+
+    st.write(' ')             
+              
     if cins_refs_all_pct_change > 0:
         st.write('• CINS referrals increased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
     else:
