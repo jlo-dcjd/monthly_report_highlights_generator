@@ -237,7 +237,7 @@ if uploaded_file is not None:
 
     stat_refs_all_ct = (df2.iloc[current_month_fy, 11])
     stat_refs_all_prev = (df2.iloc[prev_month_fy, 11])
-    stat_refs_all_pct_change = math.trunc(round((cins_refs_all_ct / cins_refs_all_prev) - 1, 2) * 100)
+    stat_refs_all_pct_change = math.trunc(round((stat_refs_all_ct / stat_refs_all_prev) - 1, 2) * 100)
 
     fel_t_22ytd = sum(df2.iloc[-2, :5].values)
     fel_t_21ytd = sum(df2.iloc[-1, :5].values)
