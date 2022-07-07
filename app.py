@@ -368,11 +368,9 @@ if uploaded_file is not None:
         st.write('• VOPs referrals decreased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
 
     if stat_refs_all_pct_change > 0:
-        st.write('• CINS referrals increased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
+        st.write('• Status referrals increased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
     else:
-        st.write('• CINS referrals decreased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
-
-    st.write(' ')             
+        st.write('• Status referrals decreased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
               
     if cins_refs_all_pct_change > 0:
         st.write('• CINS referrals increased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
