@@ -278,7 +278,9 @@ if uploaded_file is not None:
     # court hearings
     t_court_hearings_ct = df3.iloc[-2, df3.columns.get_loc("Total Held Detention Hearings")]
     t_court_hearings_prev= df3.iloc[-1, df3.columns.get_loc("Total Held Detention Hearings")]
-    t_court_hearings_22ytd_pct_chg = math.trunc(round((cins_ct / cins_prev) - 1, 2) * 100)
+    t_court_hearings_22ytd_pct_chg = math.trunc(round((t_court_hearings_ct/t_court_hearings_prev) - 1, 2) * 100)
+
+
 
     court_hear_reset_fy22 = math.trunc(round(df4.iloc[-2, -1], 2) * 100)
     court_hear_reset_fy21 = math.trunc(round(df4.iloc[-1, -1], 2) * 100)
