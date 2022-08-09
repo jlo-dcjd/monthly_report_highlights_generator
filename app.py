@@ -317,8 +317,8 @@ if uploaded_file is not None:
     def_pros_pct_chg_ytd22 = math.trunc(round(((def_pros_ytd22 + def_pros_ytd22_2 + def_pros_ytd22_3) / \
                                                (def_pros_ytd21 + def_pros_ytd21_2 + def_pros_ytd21_3) - 1), 2) * 100)
 
-    cert_adlt_fy22ytd = df5.iloc[-2, 18]
-    cert_adlt_fy21ytd = df5.iloc[-1, 18]
+    cert_adlt_fy22ytd = df5.iloc[-2, df5.columns.get_loc("Certified as an Adult")]
+    cert_adlt_fy21ytd = df5.iloc[-1, df5.columns.get_loc("Certified as an Adult")]
 
     # sealings
     seals_ct = df6.iloc[current_month_fy, 0]
