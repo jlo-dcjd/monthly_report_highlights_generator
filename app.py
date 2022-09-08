@@ -182,14 +182,14 @@ if uploaded_file is not None:
     df11.columns = col_list
 
     # psych - Psychological Services Referrals
-    df12 = pd.read_excel(uploaded_file, sheet_name=9, skiprows=6, usecols=list(range(1, 16))).T
+    df12 = pd.read_excel(uploaded_file, sheet_name=10, skiprows=6, usecols=list(range(1, 16))).T
 
     header = df12.iloc[0]
     df12 = df12.iloc[1:, : np.where(header.values == 'Total')[0][0]+1]
     df12.columns = header.values[:np.where(header.values == 'Total')[0][0]+1]
 
     # Behavioral Health
-    df13 = pd.read_excel(uploaded_file, sheet_name=9).T
+    df13 = pd.read_excel(uploaded_file, sheet_name=10).T
 
     df13.columns = df13.iloc[1]
     df13 = df13.iloc[:, :-1]
@@ -198,7 +198,7 @@ if uploaded_file is not None:
     df13 = df13.loc[:'FY21 YTD Total', :]
 
     # Clinical Service Referral Outcomes
-    df14 = pd.read_excel(uploaded_file, sheet_name=9).T
+    df14 = pd.read_excel(uploaded_file, sheet_name=10).T
 
     df14.columns = df14.iloc[1]
     df14 = df14.iloc[:, :-1]
@@ -207,7 +207,7 @@ if uploaded_file is not None:
     df14 = df14.loc[:'FY21 YTD Total', :]
     
     # education
-    df15 = pd.read_excel(uploaded_file, sheet_name=10, skiprows=4, usecols=list(range(2, 18))).T
+    df15 = pd.read_excel(uploaded_file, sheet_name=11, skiprows=4, usecols=list(range(2, 18))).T
 
     header = df15.iloc[1]
     df15 = df15.iloc[2:, 1:-2]
