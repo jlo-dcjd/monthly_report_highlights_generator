@@ -5,31 +5,73 @@ from datetime import datetime
 import math
 
 
-fy22 = [('OCT 2021'), ('NOV 2021'), ('DEC 2021'), ('JAN 2022'), ('FEB 2022'), ('MAR 2022'), ('APR 2022'), ('MAY 2022'),
-       ('JUN 2022'), ('JUL 2022'), ('AUG 2022'), ('SEP 2022')]
+# fy22 = [('OCT 2021'), ('NOV 2021'), ('DEC 2021'), ('JAN 2022'), ('FEB 2022'), ('MAR 2022'), ('APR 2022'), ('MAY 2022'),
+#        ('JUN 2022'), ('JUL 2022'), ('AUG 2022'), ('September 2022')]
+
+
+def month_index_cur():
+    ''' Return iloc for current report month'''
+    # Oct. - Nov.
+    if datetime.now().month in (11, 12):
+        return datetime.now().month - 11
+    else:
+        return datetime.now().month + 1
+
+
+def month_index_prev():
+    ''' Return iloc for previous report month'''
+    # Oct. - Nov.
+    if datetime.now().month == 12:
+        return datetime.now().month - 12
+    else:
+        return datetime.now().month
+
+
+def report_month_cur():
+    ''' Return month year for current report month'''
+    # Jan.
+    if datetime.now().month == 1:
+        return pd.to_datetime('{}-01-{}'.format(datetime.now().month + 11, datetime.now().year - 1)).strftime("%B %Y")
+    else:
+        return pd.to_datetime('{}-01-{}'.format(datetime.now().month - 1, datetime.now().year)).strftime("%B %Y")
+
+
+def report_month_prev():
+    ''' Return month year for previous report month'''
+    # Jan.
+    if datetime.now().month in (1, 2):
+        return pd.to_datetime('{}-01-{}'.format(datetime.now().month + 10, datetime.now().year - 1)).strftime("%B %Y")
+    else:
+        return pd.to_datetime('{}-01-{}'.format(datetime.now().month - 2, datetime.now().year)).strftime("%B %Y")
 
 st.title("Monthly Report Generator")
 
-current = fy22[datetime.now().month + 1]
-previous = fy22[datetime.now().month ]
+fy_current = st.text_input("Type current fiscal year:", 'FY2023')
+fy_previous = st.text_input("Type previous fiscal year:", 'FY2022')
 
-month = st.radio(
-     "Select month for the report:",
-     ('Latest Month ({})'.format(current), 'Previous Month ({})'.format(previous)))
-       
-if month == 'Latest Month ({})'.format(current):
-    current_month_fy = datetime.now().month + 1
-    prev_month_fy = datetime.now().month
-    st.write('You selected: report month ({}), previous month ({})'. format(fy22[current_month_fy], fy22[prev_month_fy]))
-else:
-    current_month_fy = datetime.now().month
-    prev_month_fy = datetime.now().month - 1
-    st.write('You selected: report month ({}), previous month ({})'. format(fy22[current_month_fy], fy22[prev_month_fy]))
 
+# current = fy22[datetime.now().month + 1]
+# previous = fy22[datetime.now().month ]
+#
+# month = st.radio(
+#      "Select month for the report:",
+#      ('Latest Month ({})'.format(current), 'Previous Month ({})'.format(previous)))
+#
+#
+# if month == 'Latest Month ({})'.format(current):
+#     month_index_cur() = datetime.now().month + 1
+#     month_index_prev() = datetime.now().month
+#     st.write('You selected: report month ({}), previous month ({})'. format(report_month_cur(), report_month_prev()))
+# else:
+#     month_index_cur() = datetime.now().month
+#     month_index_prev() = datetime.now().month - 1
+#     st.write('You selected: report month ({}), previous month ({})'. format(report_month_cur(), report_month_prev()))
+
+st.write('Current report month: ',report_month_cur())
 
 uploaded_file = st.file_uploader("Upload a monthly report")
 if uploaded_file is not None:
-    
+
     # referrals
     df = pd.read_excel(uploaded_file, sheet_name=0, skiprows=7, usecols=list(range(1, 17))).T
     df.columns = df.iloc[0]
@@ -40,7 +82,7 @@ if uploaded_file is not None:
     col = ['Month', 'F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
        'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
        'O CINS Other than Status', 'O Other', 'Total Formalized Referrals']
-       
+
     col_alt = ['Month', 'F Violent', 'F Property', 'F Drugs', 'F Weapons', 'F Other', 'M Violent',
        'M Property', 'M Drugs', 'M Weapons', 'M Other', 'O VOP', 'O Status',
        'O CINS Other than Status', 'Total Formalized Referrals']
@@ -52,9 +94,9 @@ if uploaded_file is not None:
         df2.columns = col_alt
     if df2.shape[1] == 16:
         df2.columns = col
-              
+
     df2 = df2.set_index('Month')
-       
+
     # monthly court hearings
     df3 = pd.read_excel(uploaded_file, sheet_name=1, skiprows=6, usecols=list(range(1, 17))).T
 
@@ -66,6 +108,7 @@ if uploaded_file is not None:
 
     # replace all zeros w/ null
     df3 = df3.replace(0, np.nan)
+    df3.columns = df3.columns.str.title()
 
     # hearing reset percent
     df4 = pd.read_excel(uploaded_file, sheet_name=1, skiprows=1, usecols=list(range(1, 17))).T
@@ -97,14 +140,22 @@ if uploaded_file is not None:
     df6 = df6.iloc[2:, np.where(df6.iloc[0] == 'Sealings')[0][0]: ]
     df6.columns = ['Month', 'Sealings']
     df6 = df6.set_index('Month')
-       
+
     # detention
     df7 = pd.read_excel(uploaded_file, sheet_name=3, skiprows=4, usecols=list(range(1, 18))).T
-
     header = df7.iloc[1:3]
     df7 = df7.iloc[3:, :-2]
-    col = header.values[1][:-2]
-    df7.columns = col
+
+    columns = [('Male', 'NA'), ('Male', 'Youth Served'), ('Male', 'Admissions'), ('Male', 'Total Exits'),
+               ('Male', 'ADP'), ('Male', 'ALOS'), ('Male', 'Peak Population'),
+               ('Female', 'NA'), ('Female', 'Youth Served'), ('Female', 'Admissions'), ('Female', 'Total Exits'),
+               ('Female', 'ADP'), ('Female', 'ALOS'), ('Female', 'Peak Population'),
+               ('Total', 'NA'), ('Total', 'Youth Served'), ('Total', 'Admissions'), ('Total', 'Total Exits'),
+               ('Total', 'ADP'), ('Total', 'ALOS'), ('Total', 'Peak Population')
+               ]
+
+    df7.columns = pd.MultiIndex.from_tuples(columns)
+    df7 = df7.drop([('Male', 'NA'), ('Female', 'NA'), ('Total', 'NA')], axis=1)
 
     # caseloads
     df8 = pd.read_excel(uploaded_file, sheet_name=4, skiprows=4, usecols=list(range(1, 17))).T
@@ -117,13 +168,16 @@ if uploaded_file is not None:
     df8.drop(df8.columns[[5]], axis=1, inplace=True)
 
     # supervision
-    df9 = pd.read_excel(uploaded_file, sheet_name=4, skiprows=28, usecols=list(range(1, 17))).T
+    df9 = pd.read_excel(uploaded_file, sheet_name=4, usecols=list(range(1, 17))).T
 
-    header = df9.iloc[:2]
+    header = df9.iloc[0]
+    df9 = df9.iloc[0:,
+          np.where(header.values == 'Supervision Category')[0][0]: np.where(header.values == 'Total')[0][0] + 1]
+    header2 = df9.iloc[0]
+
     df9.index = df9.iloc[:, 0]
-    df9 = df9.iloc[2:, 1:-2]
-
-    df9.columns = header.values[0][1:-2]
+    df9 = df9.iloc[2:, 1:]
+    df9.columns = header2[1:]
 
     # internal placement
     df10 = pd.read_excel(uploaded_file, sheet_name=5, skiprows=4, usecols=list(range(1, 18))).T
@@ -195,7 +249,10 @@ if uploaded_file is not None:
     df13 = df13.iloc[:, :-1]
     df13 = df13.iloc[2:, np.where(df13.iloc[1] == 'Behavioral Health Services Referrals')[0][0]+1: np.where(df13.iloc[1] == 'Total')[0][1]+1]
     df13 = df13.set_index('Referred For')
-    df13 = df13.loc[:'FY21 YTD Total', :]
+    try:
+        df13 = df13.loc[:'FY21 YTD Total', :]
+    except KeyError:
+        df13 = df13.loc[:'FY21 Total', :]
 
     # Clinical Service Referral Outcomes
     df14 = pd.read_excel(uploaded_file, sheet_name=10).T
@@ -204,8 +261,11 @@ if uploaded_file is not None:
     df14 = df14.iloc[:, :-1]
     df14 = df14.iloc[2:, np.where(df14.iloc[1] == 'Clinical Service Referral Outcomes')[0][0]+1: np.where(df14.iloc[1] == 'Behavioral Health Services Referrals Completed')[0][0]+1]
     df14 = df14.set_index('Referral Type')
-    df14 = df14.loc[:'FY21 YTD Total', :]
-    
+    try:
+        df13 = df13.loc[:'FY21 YTD Total', :]
+    except KeyError:
+        df13 = df13.loc[:'FY21 Total', :]
+
     # education
     df15 = pd.read_excel(uploaded_file, sheet_name=11, skiprows=4, usecols=list(range(2, 18))).T
 
@@ -213,106 +273,112 @@ if uploaded_file is not None:
     df15 = df15.iloc[2:, 1:-2]
     df15.columns = header.values[1:-2]
 
+
+    def round_pct_change(current, prev):
+        return round(((current / prev) - 1) * 100)
+
+
     # all refs (types)
-    t_for_refs_ct = df.iloc[current_month_fy, 2]
-    t_for_refs_prev = df.iloc[prev_month_fy, 2]
-    t_for_refs_pct_chg = math.trunc(round((t_for_refs_ct / t_for_refs_prev) - 1, 2) * 100)
+    t_for_refs_ct = df.iloc[month_index_cur(), 2]
+    t_for_refs_prev = df.iloc[month_index_prev(), 2]
+    t_for_refs_pct_chg = round_pct_change(t_for_refs_ct, t_for_refs_prev)
 
     # formal refs (offense)
-    fel_refs_all_ct = sum(df2.iloc[current_month_fy, :5].values)
-    fel_refs_all_prev = sum(df2.iloc[prev_month_fy, :5].values)
-    fel_refs_all_pct_change = math.trunc(round((fel_refs_all_ct / fel_refs_all_prev) - 1, 2) * 100)
+    fel_refs_all_ct = sum(df2.iloc[month_index_cur(), :5].values)
+    fel_refs_all_prev = sum(df2.iloc[month_index_prev(), :5].values)
+    fel_refs_all_pct_change = round_pct_change(fel_refs_all_ct, fel_refs_all_prev)
 
-    mis_refs_all_ct = sum(df2.iloc[current_month_fy, 5:10].values)
-    mis_refs_all_prev = sum(df2.iloc[prev_month_fy, 5:10].values)
-    mis_refs_all_pct_change = math.trunc(round((mis_refs_all_ct / mis_refs_all_prev) - 1, 2) * 100)
+    mis_refs_all_ct = sum(df2.iloc[month_index_cur(), 5:10].values)
+    mis_refs_all_prev = sum(df2.iloc[month_index_prev(), 5:10].values)
+    mis_refs_all_pct_change = round_pct_change(mis_refs_all_ct, mis_refs_all_prev)
 
-    vop_refs_all_ct = (df2.iloc[current_month_fy, 10])
-    vop_refs_all_prev = (df2.iloc[prev_month_fy, 10])
-    vop_refs_all_pct_change = math.trunc(round((vop_refs_all_ct / vop_refs_all_prev) - 1, 2) * 100)
+    vop_refs_all_ct = (df2.iloc[month_index_cur(), 10])
+    vop_refs_all_prev = (df2.iloc[month_index_prev(), 10])
+    vop_refs_all_pct_change = round_pct_change(vop_refs_all_ct, vop_refs_all_prev)
 
-    cins_refs_all_ct = (df2.iloc[current_month_fy, 12])
-    cins_refs_all_prev = (df2.iloc[prev_month_fy, 12])
-    cins_refs_all_pct_change = math.trunc(round((cins_refs_all_ct / cins_refs_all_prev) - 1, 2) * 100)
+    cins_refs_all_ct = (df2.iloc[month_index_cur(), 12])
+    cins_refs_all_prev = (df2.iloc[month_index_prev(), 12])
+    cins_refs_all_pct_change = round_pct_change(cins_refs_all_ct, cins_refs_all_prev)
 
-    stat_refs_all_ct = (df2.iloc[current_month_fy, 11])
-    stat_refs_all_prev = (df2.iloc[prev_month_fy, 11])
-    stat_refs_all_pct_change = math.trunc(round((stat_refs_all_ct / stat_refs_all_prev) - 1, 2) * 100)
+    stat_refs_all_ct = (df2.iloc[month_index_cur(), 11])
+    stat_refs_all_prev = (df2.iloc[month_index_prev(), 11])
+    stat_refs_all_pct_change = round_pct_change(stat_refs_all_ct, stat_refs_all_prev)
 
     fel_t_22ytd = sum(df2.iloc[-2, :5].values)
     fel_t_21ytd = sum(df2.iloc[-1, :5].values)
-    fel_t_22ytd_pct_chg = math.trunc(round((fel_t_22ytd / fel_t_21ytd) - 1, 2) * 100)
+    fel_t_22ytd_pct_chg = round_pct_change(fel_t_22ytd, fel_t_21ytd)
 
     fel_violent_ct = df2.iloc[-2, 0]
     fel_violent_prev = df2.iloc[-1, 0]
-    fel_violent_22ytd_pct_chg = math.trunc(round((fel_violent_ct / fel_violent_prev) - 1, 2) * 100)
+    fel_violent_22ytd_pct_chg = round_pct_change(fel_violent_ct, fel_violent_prev)
 
     fel_drugs_ct = df2.iloc[-2, 2]
     fel_drugs_prev = df2.iloc[-1, 2]
-    fel_drugs_22ytd_pct_chg = math.trunc(round((fel_drugs_ct / fel_drugs_prev) - 1, 2) * 100)
+    fel_drugs_22ytd_pct_chg = round_pct_change(fel_drugs_ct, fel_drugs_prev)
 
     fel_weapons_ct = df2.iloc[-2, 3]
     fel_weapons_prev = df2.iloc[-1, 3]
-    fel_weapons_22ytd_pct_chg = math.trunc(round((fel_weapons_ct / fel_weapons_prev) - 1, 2) * 100)
+    fel_weapons_22ytd_pct_chg = round_pct_change(fel_weapons_ct, fel_weapons_prev)
 
     mis_t_22ytd = sum(df2.iloc[-2, 5:10].values)
     mis_t_21ytd = sum(df2.iloc[-1, 5:10].values)
-    mis_t_22ytd_pct_chg = math.trunc(round((mis_t_22ytd / mis_t_21ytd) - 1, 2) * 100)
+    mis_t_22ytd_pct_chg = round_pct_change(mis_t_22ytd, mis_t_21ytd)
 
     mis_violent_ct = df2.iloc[-2, 5]
     mis_violent_prev = df2.iloc[-1, 5]
-    mis_violent_22ytd_pct_chg = math.trunc(round((mis_violent_ct / mis_violent_prev) - 1, 2) * 100)
+    mis_violent_22ytd_pct_chg = round_pct_change(mis_violent_ct, mis_violent_prev)
 
     mis_vop_ct = df2.iloc[-2, 10]
     mis_vop_prev = df2.iloc[-1, 10]
-    mis_vop_22ytd_pct_chg = math.trunc(round((mis_vop_ct / mis_vop_prev) - 1, 2) * 100)
+    mis_vop_22ytd_pct_chg = round_pct_change(mis_vop_ct, mis_vop_prev)
 
     status_ct = df2.iloc[-2, 11]
     status_prev = df2.iloc[-1, 11]
-    status_22ytd_pct_chg = math.trunc(round((status_ct / status_prev) - 1, 2) * 100)
+    status_22ytd_pct_chg = round_pct_change(status_ct, status_prev)
 
     cins_ct = df2.iloc[-2, 12]
     cins_prev = df2.iloc[-1, 12]
-    cins_22ytd_pct_chg = math.trunc(round((cins_ct / cins_prev) - 1, 2) * 100)
+    cins_22ytd_pct_chg = round_pct_change(cins_ct, cins_prev)
 
     # court hearings
     t_court_hearings_ct = df3.iloc[-2, df3.columns.get_loc("Total Held Detention Hearings")]
     t_court_hearings_prev= df3.iloc[-1, df3.columns.get_loc("Total Held Detention Hearings")]
-    t_court_hearings_22ytd_pct_chg = math.trunc(round((t_court_hearings_ct/t_court_hearings_prev) - 1, 2) * 100)
+    t_court_hearings_22ytd_pct_chg = round_pct_change(t_court_hearings_ct, t_court_hearings_prev)
 
 
 
     court_hear_reset_fy22 = math.trunc(round(df4.iloc[-2, -1], 2) * 100)
     court_hear_reset_fy21 = math.trunc(round(df4.iloc[-1, -1], 2) * 100)
 
-    # all def pros
-    def_pros_ct = df5.iloc[current_month_fy, 2]
-    def_pros_ct2 = df5.iloc[current_month_fy, 6]
-    def_pros_ct3 = df5.iloc[current_month_fy, 12]
+    # Deferred Prosecution MTM
+    def_pros_ct = df5.iloc[month_index_cur(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][0]]
+    def_pros_ct2 = df5.iloc[month_index_cur(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][1]]
+    def_pros_ct3 = df5.iloc[month_index_cur(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][2]]
 
-    def_pros_prev = df5.iloc[prev_month_fy, 2]
-    def_pros_prev2 = df5.iloc[prev_month_fy, 6]
-    def_pros_prev3 = df5.iloc[prev_month_fy, 12]
+    def_pros_prev = df5.iloc[month_index_prev(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][0]]
+    def_pros_prev2 = df5.iloc[month_index_prev(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][1]]
+    def_pros_prev3 = df5.iloc[month_index_prev(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][2]]
 
     def_pros_pct_chg_mtm = math.trunc(round(((def_pros_ct + def_pros_ct2 + def_pros_ct3) / \
                                              (def_pros_prev + def_pros_prev2 + def_pros_prev3) - 1), 2) * 100)
 
     # Adjudicated to Probation
-    adj_prob_ct = df5.iloc[current_month_fy, 13]
-    adj_prob_prev = df5.iloc[prev_month_fy, 13]
-    adj_prob_pct_chg_mtm = math.trunc(round(adj_prob_ct / adj_prob_prev - 1, 2) * 100)
+    adj_prob_ct = df5.iloc[month_index_cur(), df5.columns.get_loc('Adjudicated to Probation')]
+    adj_prob_prev = df5.iloc[month_index_prev(), df5.columns.get_loc('Adjudicated to Probation')]
+    adj_prob_pct_chg_mtm = round_pct_change(adj_prob_ct, adj_prob_prev)
 
-    adj_prob_fy22_ytd = df5.iloc[-2, 13]
-    adj_prob_fy21_ytd = df5.iloc[-1, 13]
-    adj_prob_fy22_ytd_pct_chg = math.trunc(round(adj_prob_fy22_ytd / adj_prob_fy21_ytd - 1, 2) * 100)
+    adj_prob_fy22_ytd = df5.iloc[-2, df5.columns.get_loc('Adjudicated to Probation')]
+    adj_prob_fy21_ytd = df5.iloc[-1, df5.columns.get_loc('Adjudicated to Probation')]
+    adj_prob_fy22_ytd_pct_chg = round_pct_change(adj_prob_fy22_ytd, adj_prob_fy21_ytd)
 
-    def_pros_ytd22 = df5.iloc[-2, 2]
-    def_pros_ytd22_2 = df5.iloc[-2, 6]
-    def_pros_ytd22_3 = df5.iloc[-2, 12]
+    # Deferred Prosecution YTD
+    def_pros_ytd22 = df5.iloc[-2, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][0]]
+    def_pros_ytd22_2 = df5.iloc[-2, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][1]]
+    def_pros_ytd22_3 = df5.iloc[-2, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][2]]
 
-    def_pros_ytd21 = df5.iloc[-1, 2]
-    def_pros_ytd21_2 = df5.iloc[-1, 6]
-    def_pros_ytd21_3 = df5.iloc[-1, 12]
+    def_pros_ytd21 = df5.iloc[-1, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][0]]
+    def_pros_ytd21_2 = df5.iloc[-1, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][1]]
+    def_pros_ytd21_3 = df5.iloc[-1, np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][2]]
 
     def_pros_pct_chg_ytd22 = math.trunc(round(((def_pros_ytd22 + def_pros_ytd22_2 + def_pros_ytd22_3) / \
                                                (def_pros_ytd21 + def_pros_ytd21_2 + def_pros_ytd21_3) - 1), 2) * 100)
@@ -321,359 +387,577 @@ if uploaded_file is not None:
     cert_adlt_fy21ytd = df5.iloc[-1, df5.columns.get_loc("Certified as an Adult")]
 
     # sealings
-    seals_ct = df6.iloc[current_month_fy, 0]
+    seals_ct = df6.iloc[month_index_cur(), 0]
     seals_fy22ytd = df6.iloc[-2, 0]
 
     # detentions
-    det_t_admin_ct = df7.iloc[current_month_fy, -5]
-    det_t_admin_prev = df7.iloc[prev_month_fy, -5]
-    det_t_admin_pct_chg_mtm = math.trunc(round((det_t_admin_ct / det_t_admin_prev) - 1, 2) * 100)
+    det_t_admin_ct = df7.iloc[month_index_cur(), -5]
+    det_t_admin_prev = df7.iloc[month_index_prev(), -5]
+    det_t_admin_pct_chg_mtm =  round_pct_change(det_t_admin_ct, det_t_admin_prev)
 
-    det_t_exits_ct = df7.iloc[current_month_fy, -4]
-    det_t_exits_prev = df7.iloc[prev_month_fy, -4]
-    det_t_exits_pct_chg_mtm = math.trunc(round((det_t_exits_ct / det_t_exits_prev) - 1, 2) * 100)
+    det_t_exits_ct = df7.iloc[month_index_cur(), -4]
+    det_t_exits_prev = df7.iloc[month_index_prev(), -4]
+    det_t_exits_pct_chg_mtm = round_pct_change(det_t_exits_ct, det_t_exits_prev)
 
-    det_t_alos_ct = round(df7.iloc[current_month_fy, -2], 2)
-    det_t_alos_prev = round(df7.iloc[prev_month_fy, -2], 2)
+    det_t_alos_ct = round(df7.iloc[month_index_cur(), -2], 2)
+    det_t_alos_prev = round(df7.iloc[month_index_prev(), -2], 2)
 
-    det_t_adp_ct = round(df7.iloc[current_month_fy, -3], 0)
-    det_t_adp_prev = round(df7.iloc[prev_month_fy, -3], 0)
-    det_t_adp_pct_chg_mtm = math.trunc(round((det_t_adp_ct / det_t_adp_prev) - 1, 2) * 100)
+    det_t_adp_ct = round(df7.iloc[month_index_cur(), -3], 0)
+    det_t_adp_prev = round(df7.iloc[month_index_prev(), -3], 0)
+    det_t_adp_pct_chg_mtm = round_pct_change(det_t_adp_ct, det_t_adp_prev)
 
+
+
+    st.markdown("---")
     st.title('***Referrals***')
     st.write('\n')
 
     if t_for_refs_pct_chg > 0:
         st.write(
             'The Dallas County Juvenile Department (DCJD) received {} formalized referrals in {}, a {}% increase from the {} in {}.'.format(
-                t_for_refs_ct, fy22[current_month_fy], t_for_refs_pct_chg, t_for_refs_prev, fy22[prev_month_fy]))
+                t_for_refs_ct, report_month_cur(), t_for_refs_pct_chg, t_for_refs_prev, report_month_prev()))
     else:
         st.write(
             'The Dallas County Juvenile Department (DCJD) received {} formalized referrals in {}, a {}% decrease from the {} in {}.'.format(
-                t_for_refs_ct, fy22[current_month_fy], t_for_refs_pct_chg, t_for_refs_prev, fy22[prev_month_fy]))
+                t_for_refs_ct, report_month_cur(), t_for_refs_pct_chg, t_for_refs_prev, report_month_prev()))
 
     st.write(' ')
-    st.write('Compared to the previous month, ')
+
+    ref_list_mtm = []
+
     if fel_refs_all_pct_change > 0:
-        st.write('• Felony referrals increased by {}% ({} vs. {})'.format(fel_refs_all_pct_change, fel_refs_all_ct, fel_refs_all_prev))
+        ref_list_mtm.append('Compared to the previous month, felony referrals increased by {}%,'.format(fel_refs_all_pct_change))
     else:
-        st.write('• Felony referrals decreased by {}% ({} vs. {})'.format(fel_refs_all_pct_change, fel_refs_all_ct, fel_refs_all_prev))
+        ref_list_mtm.append('Compared to the previous month, felony referrals decrease by {}%,'.format(fel_refs_all_pct_change))
 
     if mis_refs_all_pct_change > 0:
-        st.write('• Misdemeanor referrals increased by {}% ({} vs. {})'.format(mis_refs_all_pct_change, mis_refs_all_ct, mis_refs_all_prev))
+        ref_list_mtm.append('misdemeanor referrals increased by {}%,'.format(mis_refs_all_pct_change))
     else:
-        st.write('• Misdemeanor referrals decreased by {}% ({} vs. {})'.format(mis_refs_all_pct_change, mis_refs_all_ct, mis_refs_all_prev))
+        ref_list_mtm.append('misdemeanor referrals decrease by {}%,'.format(mis_refs_all_pct_change))
 
     if vop_refs_all_pct_change > 0:
-        st.write('• VOPs referrals increased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
+        ref_list_mtm.append('VOPs referrals increased by {}%,'.format(vop_refs_all_pct_change))
     else:
-        st.write('• VOPs referrals decreased by {}% ({} vs. {})'.format(vop_refs_all_pct_change, vop_refs_all_ct, vop_refs_all_prev))
+        ref_list_mtm.append('VOPs referrals decrease by {}%,'.format(vop_refs_all_pct_change))
 
-    if stat_refs_all_pct_change > 0:
-        st.write('• Status referrals increased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
-    else:
-        st.write('• Status referrals decreased by {}% ({} vs. {})'.format(stat_refs_all_pct_change, stat_refs_all_ct, stat_refs_all_prev))
-              
     if cins_refs_all_pct_change > 0:
-        st.write('• CINS referrals increased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
+        ref_list_mtm.append('CINS referrals increased by {}%.'.format(cins_refs_all_pct_change))
     else:
-        st.write('• CINS referrals decreased by {}% ({} vs. {})'.format(cins_refs_all_pct_change, cins_refs_all_ct, cins_refs_all_prev))
+        ref_list_mtm.append('CINS referrals decrease by {}%.'.format(cins_refs_all_pct_change))
 
+    st.write(' '.join(ref_list_mtm))
     st.write(' ')
 
-    st.write('Compared to the same months in FY2021,')
+    ref_list_ytd = []
+
+    st.write('Compared to the same months in {},'.format(fy_previous))
+
     if fel_t_22ytd_pct_chg > 0:
-        st.write('   DCJD received {}% more felony referrals in FY2022 year-to-date'.format(fel_t_22ytd_pct_chg))
+        ref_list_ytd.append(
+            'DCJD received {}% more felony referrals in {} year-to-date,'.format(fel_t_22ytd_pct_chg, fy_current))
     else:
-        st.write('   DCJD received {}% less felony referrals in FY2022 year-to-date'.format(fel_t_22ytd_pct_chg))
+        ref_list_ytd.append(
+            'DCJD received {}% less felony referrals in {} year-to-date,'.format(fel_t_22ytd_pct_chg, fy_current))
 
     if fel_violent_22ytd_pct_chg > 0:
-        st.write('   including a {}% increase in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
+        ref_list_ytd.append('including a {}% increase in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
     else:
-        st.write('   including a {}% decrease in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
+        ref_list_ytd.append('including a {}% decrease in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
 
     if fel_drugs_22ytd_pct_chg > 0:
-        st.write('   a {}% increase in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% increase in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
     else:
-        st.write('   a {}% decrease in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% decrease in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
 
     if fel_weapons_22ytd_pct_chg > 0:
-        st.write('   a {}% increase in felony weapons referrals'.format(fel_weapons_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% increase in felony weapons referrals.'.format(fel_weapons_22ytd_pct_chg))
     else:
-        st.write('   a {}% decrease in felony weapons referrals'.format(fel_weapons_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% decrease in felony weapons referrals.'.format(fel_weapons_22ytd_pct_chg))
 
+    st.write(' '.join(ref_list_ytd))
     st.write(' ')
 
-    st.write('Through the same {} months,'.format(current_month_fy + 1))
+    st.write('Through the same {} months,'.format(month_index_cur() + 1))
+
+    ref_m_list_ytd = []
+
     if mis_t_22ytd_pct_chg > 0:
-        st.write('   DCJD received {}% more misdemeanor referrals compared to FY2021,'.format(mis_t_22ytd_pct_chg))
+        ref_m_list_ytd.append(
+            'DCJD received {}% more misdemeanor referrals compared to {},'.format(mis_t_22ytd_pct_chg, fy_previous))
     else:
-        st.write('   DCJD received {}% less misdemeanor referrals compared to FY2021,'.format(mis_t_22ytd_pct_chg))
+        ref_m_list_ytd.append(
+            'DCJD received {}% less misdemeanor referrals compared to {},'.format(mis_t_22ytd_pct_chg, fy_previous))
 
     if mis_violent_22ytd_pct_chg > 0:
-        st.write('   including an {}% increase in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
+        ref_m_list_ytd.append('including an {}% increase in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
     else:
-        st.write('   including an {}% decrease in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
+        ref_m_list_ytd.append('including an {}% decrease in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
 
     if mis_vop_22ytd_pct_chg > 0:
-        st.write('   while also receiving nearly a {}% increase in VOP referrals,'.format(mis_vop_22ytd_pct_chg))
+        ref_m_list_ytd.append(
+            'while also receiving nearly a {}% increase in VOP referrals,'.format(mis_vop_22ytd_pct_chg))
     else:
-        st.write('   while also receiving nearly {}% decrease in VOP referrals,'.format(mis_vop_22ytd_pct_chg))
+        ref_m_list_ytd.append(
+            'while also receiving nearly {}% decrease in VOP referrals,'.format(mis_vop_22ytd_pct_chg))
 
     if status_22ytd_pct_chg > 0:
-        st.write('   {}% more status offense referrals,'.format(status_22ytd_pct_chg))
+        ref_m_list_ytd.append('{}% more status offense referrals,'.format(status_22ytd_pct_chg))
     else:
-        st.write('   {}% fewer status offense referrals,'.format(status_22ytd_pct_chg))
+        ref_m_list_ytd.append('{}% fewer status offense referrals,'.format(status_22ytd_pct_chg))
 
     if cins_22ytd_pct_chg > 0:
-        st.write('   and a {}% more CINS other than status referrals in FY2022.'.format(cins_22ytd_pct_chg))
+        ref_m_list_ytd.append('and a {}% more CINS other than status referrals in {}.'.format(cins_22ytd_pct_chg, fy_current))
     else:
-        st.write('   and a {}% more CINS other than status referrals in FY2022.'.format(cins_22ytd_pct_chg))
+        ref_m_list_ytd.append('and a {}% more CINS other than status referrals in {}.'.format(cins_22ytd_pct_chg, fy_current))
 
+    st.write(' '.join(ref_m_list_ytd))
+
+
+
+    st.markdown("---")
     # court hearing
     st.write('\n')
-    st.title('***Court Hearings***')
+    st.title('***Court Hearings & Dispositions***')
     st.write('\n')
 
-    st.write('Compared to the first {} months of FY2021,'.format(current_month_fy + 1))
+    det_hear_list = []
+
     if t_court_hearings_22ytd_pct_chg > 0:
-        st.write('the number of detention hearings held in FY2022 increased by {}%, including:'.format(
+        det_hear_list.append('Compared to the first {} months of {}, the number of detention hearings held in {} increased by {}%, including'.format(
+            month_index_cur() + 1,
+            fy_previous,
+            fy_current,
             t_court_hearings_22ytd_pct_chg))
     else:
-        st.write('the number of detention hearings held in FY2022 decreased by {}%, including:'.format(
+        det_hear_list.append('Compared to the first {} months of {}, the number of detention hearings held in {} decreased by {}%, including'.format(
+            month_index_cur() + 1,
+            fy_previous,
+            fy_current,
             t_court_hearings_22ytd_pct_chg))
 
-    try:
-        for i in range(6):
+    for i in range(6):
+        try:
             if (df3.iloc[-2, i] / df3.iloc[-1, i]) - 1 > 0:
-                st.write('• a {}% increase in {} hearings.'.format(
+                det_hear_list.append('a {}% increase in {} hearings,'.format(
                     math.trunc(round((df3.iloc[-2, i] / df3.iloc[-1, i]) - 1, 2) * 100),
                     df3.iloc[:, :6].columns[i]))
             else:
-                st.write('• a {}% decrease in {} hearings.'.format(
+                det_hear_list.append('a {}% decrease in {} hearings,'.format(
                     math.trunc(round((df3.iloc[-2, i] / df3.iloc[-1, i]) - 1, 2) * 100),
                     df3.iloc[:, :6].columns[i]))
-    except:
-        pass
+        except:
+            pass
+
+
+    non_det_hearings = (((df3.iloc[-2, -1] - df3.iloc[-2, df3.columns.get_loc('Total Held Detention Hearings')]) / (df3.iloc[-1, -1] - df3.iloc[-1, df3.columns.get_loc('Total Held Detention Hearings')]) - 1).round(2)*100).astype(int)
+
+    if non_det_hearings > 0:
+        det_hear_list.append('and non-detention hearings increased by {}%.'.format(
+            non_det_hearings))
+    else:
+        det_hear_list.append('and non-detention hearings decreased by {}%.'.format(
+            non_det_hearings))
+
+
+    st.write(' '.join(det_hear_list))
+
 
     # resets
     st.write('\n')
     if court_hear_reset_fy22 > court_hear_reset_fy21:
         st.write(
-            'Court hearing resets are higher than the previous fiscal year: {}% of court hearings being reset in FY2022 year-to-date, compared to {}% of court hearings during the first {} months of FY2021.'.format(
-                court_hear_reset_fy22, court_hear_reset_fy21, current_month_fy + 1))
+            'Court hearing resets are higher than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
+                court_hear_reset_fy22, fy_current, court_hear_reset_fy21, month_index_cur() + 1, fy_previous))
     else:
         st.write(
-            'Court hearing resets are lower than the previous fiscal year: {}% of court hearings being reset in FY2022 year-to-date, compared to {}% of court hearings during the first {} months of FY2021.'.format(
-                court_hear_reset_fy22, court_hear_reset_fy21, current_month_fy + 1))
+            'Court hearing resets are lower than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
+                court_hear_reset_fy22, fy_current, court_hear_reset_fy21, month_index_cur() + 1, fy_previous))
 
-    st.write('\n')
-    st.title('***Dispositions, Sealings***')
+
+    # Dispositions
+    disp_list = []
     st.write('\n')
 
     if def_pros_pct_chg_mtm > 0:
-        st.write('The number of youths disposed to Deferred Prosecution had a month-to-month increase of {}% in {}'.format(
-            def_pros_pct_chg_mtm, fy22[current_month_fy]))
+        disp_list.append('The number of youths disposed to Deferred Prosecution had a month-to-month increase of {}% in {},'.format(
+            def_pros_pct_chg_mtm, report_month_cur()))
     else:
-        st.write('The number of youths disposed to Deferred Prosecution had a month-to-month decrease of {}% in {}'.format(
-            def_pros_pct_chg_mtm, fy22[current_month_fy]))
+        disp_list.append('The number of youths disposed to Deferred Prosecution had a month-to-month decrease of {}% in {},'.format(
+            abs(def_pros_pct_chg_mtm), report_month_cur()))
 
     if adj_prob_pct_chg_mtm > 0:
-        st.write('The number of youths adjudicated to Probation had a month-to-month increase of {}% in {}'.format(
-            adj_prob_pct_chg_mtm, fy22[current_month_fy]))
+        disp_list.append('adjudicated to Probation had a month-to-month increase of {}%.'.format(
+            adj_prob_pct_chg_mtm, report_month_cur()))
     else:
-        st.write('The number of youths adjudicated to Probation had a month-to-month decrease of {}% in {}'.format(
-            adj_prob_pct_chg_mtm, fy22[current_month_fy]))
+        disp_list.append('adjudicated to Probation had a month-to-month decrease of {}%.'.format(
+            abs(adj_prob_pct_chg_mtm), report_month_cur()))
 
     if adj_prob_fy22_ytd_pct_chg > 0:
-        st.write('Adjudications to Probation increase by {}% YTD FY2022 vs. YTD FY2021'.format(adj_prob_fy22_ytd_pct_chg))
+        disp_list.append('Adjudications to Probation increased by {}% {} YTD compared to {} YTD,'.format(adj_prob_fy22_ytd_pct_chg, fy_current, fy_previous))
     else:
-        st.write('Adjudications to Probation decrease by {}% YTD FY2022 vs. YTD FY2021'.format(adj_prob_fy22_ytd_pct_chg))
+        disp_list.append('Adjudications to Probation decreased by {}% {} YTD compared to {} YTD,'.format(adj_prob_fy22_ytd_pct_chg, fy_current, fy_previous))
 
     if def_pros_pct_chg_ytd22 > 0:
-        st.write('Deferred Prosecution dispositions increase by {}% YTD FY2022 vs. YTD FY2021'.format(
-            def_pros_pct_chg_ytd22))
+        disp_list.append('and Deferred Prosecution dispositions increased by {}% {} YTD compared to {} YTD.'.format(def_pros_pct_chg_ytd22,
+            fy_current, fy_previous))
     else:
-        st.write('Deferred Prosecution dispositions decrease by {}% YTD FY2022 vs. YTD FY2021'.format(
-            def_pros_pct_chg_ytd22))
+        disp_list.append('and Deferred Prosecution dispositions decreased by {}% {} YTD compared to {} YTD.'.format(
+            def_pros_pct_chg_ytd22, fy_current, fy_previous))
 
     if def_pros_pct_chg_ytd22 > 0:
-        st.write(
-            '{} juveniles were certified as an adult through FY2022 YTD compared to {} certifications in FY2021 YTD'.format(
-                cert_adlt_fy22ytd, cert_adlt_fy21ytd))
+        disp_list.append(
+            'Finally, {} juveniles were certified as an adult through {} YTD compared to {} certifications in {} YTD.'.format(
+                cert_adlt_fy22ytd, fy_current, cert_adlt_fy21ytd, fy_previous))
 
-    st.write('The Records Unit sealed {} records in {}; {} sealings in FY22 YTD '.format(seals_ct, fy22[current_month_fy],
+    st.write(' '.join(disp_list))
+
+
+
+    st.markdown('---')
+    st.write('\n')
+    st.title('***Sealings***')
+    st.write('\n')
+
+
+
+    st.write('The Records Unit sealed {} records in {}, bringing the {} YTD total to {}.'.format(seals_ct, report_month_cur(), fy_current,
                                                                                       seals_fy22ytd))
 
+
+
+    st.markdown("---")
     st.write('\n')
     st.title('***Detention***')
+
+    # Detention Admissions
+    det_admit_list = []
+
+    if df7.iloc[month_index_cur(), 13] / df7.iloc[ month_index_prev(), 13] - 1 > 0:
+        det_admit_list.append('DCJD had {} admissions to detention in {}, a {}% increase from {}.'.format(
+            int(df7.iloc[month_index_cur(), 13]),
+            report_month_cur(),
+            round((df7.iloc[month_index_cur(), 13] / df7.iloc[ month_index_prev(), 13] - 1)*100),
+            report_month_prev()))
+    else:
+        det_admit_list.append('DCJD had {} admissions to detention in {}, a {}% decrease from {}.'.format(
+            int(df7.iloc[month_index_cur(), 13]),
+            report_month_cur(),
+            abs(round((df7.iloc[month_index_cur(), 13] / df7.iloc[month_index_prev(), 13] - 1) * 100)),
+            report_month_prev()))
+
+
+    det_admissions_ytd_pct_change = round((((df7.loc['FY22 Total', ('Total', 'Admissions')]) / (df7.loc['FY21 Total', ('Total', 'Admissions')]) - 1) * 100))
+
+    if det_admissions_ytd_pct_change > 0:
+        det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% higher than the total admissions during the same months of the previous fiscal year.'.format(
+            int(df7.loc['FY22 Total', ('Total', 'Admissions')]),
+            month_index_cur()+1,
+            fy_current,
+            det_admissions_ytd_pct_change))
+    else:
+        det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% lower than the total admissions during the same months of the previous fiscal year.'.format(
+            int(df7.loc['FY22 Total', ('Total', 'Admissions')]),
+            month_index_cur()+1,
+            fy_current,
+            det_admissions_ytd_pct_change))
+
+    st.write(' '.join(det_admit_list))
+
+
+    # Detention Exits
+    detlist2 = []
+    if round((df7.iloc[month_index_cur(), 14] / df7.iloc[ month_index_prev(), 14] - 1)*100) > 0:
+        detlist2.append('The total number of exits from detention in {} increased by {}% compared to the previous month.'.format(
+            report_month_cur(),
+            round((df7.iloc[month_index_cur(), 14] / df7.iloc[month_index_prev(), 14] - 1) * 100)))
+    else:
+        detlist2.append('The total number of exits from detention in {} decreased by {}% compared to the previous month.'.format(
+            report_month_cur(),
+            round((df7.iloc[month_index_cur(), 14] / df7.iloc[month_index_prev(), 14] - 1) * 100)))
+
+
+    if round((df7.iloc[month_index_cur(), 16] / df7.iloc[ month_index_prev(), 16] - 1)*100) > 0:
+        detlist2.append('For youth who exited detention during the month, the Average Length of Stay was {} days, a {}% increase from {} ALOS of {} days.'.format(
+                    round(df7.iloc[month_index_cur(), 16], 1),
+                    round((df7.iloc[month_index_cur(), 16] / df7.iloc[ month_index_prev(), 16] - 1)*100),
+                    report_month_prev().split()[0] + '\'s',
+                    round(df7.iloc[month_index_prev(), 16], 1)
+                    ))
+    else:
+        detlist2.append(
+            'For youth who exited detention during the month, the Average Length of Stay was {} days, a {}% decrease from {} ALOS of {} days.'.format(
+                round(df7.iloc[month_index_cur(), 16], 1),
+                abs(round((df7.iloc[month_index_cur(), 16] / df7.iloc[month_index_prev(), 16] - 1) * 100)),
+                report_month_prev().split()[0] + '\'s',
+                round(df7.iloc[month_index_prev(), 16], 1)
+            ))
+
+    if round((df7.iloc[month_index_cur(), 4] / df7.iloc[ month_index_prev(), 4] - 1)*100) > 0:
+        detlist2.append('The monthly ALOS for males released in {} increased by {}% ({} to {} days)'.format(
+            report_month_prev().split()[0],
+            abs(round((df7.iloc[month_index_cur(), 4] / df7.iloc[month_index_prev(), 4] - 1) * 100)),
+            round(df7.iloc[month_index_prev(), 4]),
+            round(df7.iloc[month_index_cur(), 4])
+        ))
+    else:
+        detlist2.append('The monthly ALOS for males released in {} decreased by {}% ({} to {} days)'.format(
+            report_month_prev().split()[0],
+            abs(round((df7.iloc[month_index_cur(), 4] / df7.iloc[month_index_prev(), 4] - 1) * 100)),
+            round(df7.iloc[month_index_prev(), 4]),
+            round(df7.iloc[month_index_cur(), 4])
+        ))
+
+    if round((df7.iloc[month_index_cur(), 10] / df7.iloc[ month_index_prev(), 10] - 1)*100) > 0:
+        detlist2.append(('and the ALOS for females increased by {}% ({} to {} days) compared to the previous month.'.format(
+                        abs(round((df7.iloc[month_index_cur(), 10] / df7.iloc[ month_index_prev(), 10] - 1)*100)),
+                        round(df7.iloc[month_index_prev(), 10]),
+                        round(df7.iloc[month_index_cur(), 10])
+                        )))
+    else:
+        detlist2.append(
+            ('and the ALOS for females decreased by {}% ({} to {} days) compared to the previous month.'.format(
+                abs(round((df7.iloc[month_index_cur(), 10] / df7.iloc[month_index_prev(), 10] - 1) * 100)),
+                round(df7.iloc[month_index_prev(), 10]),
+                round(df7.iloc[month_index_cur(), 10])
+            )))
+
+    st.write(' '.join(detlist2))
+
+    # Detention ADP
+    detlist3 = []
+
+    if round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100) > 0:
+        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% increase from {}'.format(
+            report_month_cur(),
+            round(df7.iloc[month_index_cur(), 15], 1),
+            round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100),
+            report_month_prev()
+        ))
+    else:
+        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% decrease from {}'.format(
+            report_month_cur(),
+            round(df7.iloc[month_index_cur(), 15], 1),
+            abs(round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100)),
+            report_month_prev()
+        ))
+
+    if round((df7.iloc[-2, 15] / df7.iloc[-1, 15] - 1)*100) > 0:
+        detlist3.append(('The {} Detention ADP was {}% higher than that of the previous fiscal year, increasing from {} in {} to {}.'.format(
+                fy_current,
+                round((df7.iloc[-2, 15] / df7.iloc[-1, 15] - 1)*100),
+                round(df7.iloc[-1, 15], 1),
+                fy_previous,
+                round(df7.iloc[-2, 15], 1)
+            )))
+    else:
+        detlist3.append(('The {} Detention ADP was {}% lower than that of the previous fiscal year, decreasing from {} in {} to {}.'.format(
+                fy_current,
+                abs(round((df7.iloc[-2, 15] / df7.iloc[-1, 15] - 1)*100)),
+                round(df7.iloc[-1, 15], 1),
+                fy_previous,
+                round(df7.iloc[-2, 15], 1)
+            )))
+
+
+    st.write(' '.join(detlist3))
+
     st.write('\n')
 
-    st.write('month-to-month total'.upper())
+    # st.write('MONTH-TO-MONTH TOTAL')
+    # for i in range(12, 17):
+    #     try:
+    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
+    #             st.write('The total {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                           report_month_cur(),
+    #                                                                                           round((df7.iloc[month_index_cur(), i] / df7.iloc[ month_index_prev(), i] - 1)*100),
+    #                                                                                           report_month_prev(),
+    #                                                                                           (round(df7.iloc[month_index_cur(), i], 2)),
+    #                                                                                           (round(df7.iloc[month_index_prev(), i], 2))))
+    #         else:
+    #             st.write('The total {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                           report_month_cur(),
+    #                                                                                           round((df7.iloc[month_index_cur(), i] / df7.iloc[ month_index_prev(), i] - 1)*100),
+    #                                                                                           report_month_prev(),
+    #                                                                                           (round(df7.iloc[month_index_cur(), i], 2)),
+    #                                                                                           (round(df7.iloc[month_index_prev(), i], 2))))
+    #     except:
+    #         pass
+    #
+    # st.write('\n')
+    # st.write('MONTH-TO-MONTH MALE')
+    # for i in range(1, 5):
+    #     try:
+    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
+    #             st.write('The male {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                          report_month_cur(),
+    #                                                                                          math.trunc(round((df7.iloc[
+    #                                                                                                                month_index_cur(), i] /
+    #                                                                                                            df7.iloc[
+    #                                                                                                                month_index_prev(), i]) - 1,
+    #                                                                                                           2) * 100),
+    #                                                                                          report_month_prev(),
+    #                                                                                          (round(df7.iloc[
+    #                                                                                                               month_index_cur(), i],
+    #                                                                                                           2)),
+    #                                                                                          (round(df7.iloc[
+    #                                                                                                               month_index_prev(), i],
+    #                                                                                                           2))))
+    #         else:
+    #             st.write('The male {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                          report_month_cur(),
+    #                                                                                          math.trunc(round((df7.iloc[
+    #                                                                                                                month_index_cur(), i] /
+    #                                                                                                            df7.iloc[
+    #                                                                                                                month_index_prev(), i]) - 1,
+    #                                                                                                           2) * 100),
+    #                                                                                          report_month_prev(),
+    #                                                                                          (round(df7.iloc[
+    #                                                                                                               month_index_cur(), i],
+    #                                                                                                           2)),
+    #                                                                                          (round(df7.iloc[
+    #                                                                                                               month_index_prev(), i],
+    #                                                                                                           2))))
+    #     except:
+    #         pass
+    #
+    # st.write('\n')
+    # st.write('MONTH-TO-MONTH FEMALE')
+    # for i in range(6, 11):
+    #     try:
+    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
+    #             st.write('The female {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                            report_month_cur(),
+    #                                                                                            math.trunc(round((
+    #                                                                                                                         df7.iloc[
+    #                                                                                                                             month_index_cur(), i] /
+    #                                                                                                                         df7.iloc[
+    #                                                                                                                             month_index_prev(), i]) - 1,
+    #                                                                                                             2) * 100),
+    #                                                                                            report_month_prev(),
+    #                                                                                            (round(
+    #                                                                                                df7.iloc[
+    #                                                                                                    month_index_cur(), i],
+    #                                                                                                2)),
+    #                                                                                            (round(
+    #                                                                                                df7.iloc[
+    #                                                                                                    month_index_prev(), i],
+    #                                                                                                2))))
+    #         else:
+    #             st.write('The female {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
+    #                                                                                            report_month_cur(),
+    #                                                                                            math.trunc(round((
+    #                                                                                                                         df7.iloc[
+    #                                                                                                                             month_index_cur(), i] /
+    #                                                                                                                         df7.iloc[
+    #                                                                                                                             month_index_prev(), i]) - 1,
+    #                                                                                                             2) * 100),
+    #                                                                                            report_month_prev(),
+    #                                                                                            math.trunc(round(
+    #                                                                                                df7.iloc[
+    #                                                                                                    month_index_cur(), i],
+    #                                                                                                2)),
+    #                                                                                            math.trunc(round(
+    #                                                                                                df7.iloc[
+    #                                                                                                    month_index_prev(), i],
+    #                                                                                                2))))
+    #     except:
+    #         pass
 
-    try:
-        for i in range(15, 21):
-            if (df7.iloc[current_month_fy, i] / df7.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write('The total {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                              fy22[current_month_fy],
-                                                                                              math.trunc(round((
-                                                                                                                           df7.iloc[
-                                                                                                                               current_month_fy, i] /
-                                                                                                                           df7.iloc[
-                                                                                                                               prev_month_fy, i]) - 1,
-                                                                                                               2) * 100),
-                                                                                              fy22[prev_month_fy],
-                                                                                              math.trunc(round(df7.iloc[
-                                                                                                                   current_month_fy, i],
-                                                                                                               2)),
-                                                                                              math.trunc(round(df7.iloc[
-                                                                                                                   prev_month_fy, i],
-                                                                                                               2))))
-            else:
-                st.write('The total {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                              fy22[current_month_fy],
-                                                                                              math.trunc(round((
-                                                                                                                           df7.iloc[
-                                                                                                                               current_month_fy, i] /
-                                                                                                                           df7.iloc[
-                                                                                                                               prev_month_fy, i]) - 1,
-                                                                                                               2) * 100),
-                                                                                              fy22[prev_month_fy],
-                                                                                              math.trunc(round(df7.iloc[
-                                                                                                                   current_month_fy, i],
-                                                                                                               2)),
-                                                                                              math.trunc(round(df7.iloc[
-                                                                                                                   prev_month_fy, i],
-                                                                                                               2))))
-    except:
-        pass
 
-    st.write('\n')
-    st.write('MONTH-TO-MONTH MALE')
-    try:
-        for i in range(1, 7):
-            if (df7.iloc[current_month_fy, i] / df7.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write('The male {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                             fy22[current_month_fy],
-                                                                                             math.trunc(round((df7.iloc[
-                                                                                                                   current_month_fy, i] /
-                                                                                                               df7.iloc[
-                                                                                                                   prev_month_fy, i]) - 1,
-                                                                                                              2) * 100),
-                                                                                             fy22[prev_month_fy],
-                                                                                             math.trunc(round(df7.iloc[
-                                                                                                                  current_month_fy, i],
-                                                                                                              2)),
-                                                                                             math.trunc(round(df7.iloc[
-                                                                                                                  prev_month_fy, i],
-                                                                                                              2))))
-            else:
-                st.write('The male {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                             fy22[current_month_fy],
-                                                                                             math.trunc(round((df7.iloc[
-                                                                                                                   current_month_fy, i] /
-                                                                                                               df7.iloc[
-                                                                                                                   prev_month_fy, i]) - 1,
-                                                                                                              2) * 100),
-                                                                                             fy22[prev_month_fy],
-                                                                                             math.trunc(round(df7.iloc[
-                                                                                                                  current_month_fy, i],
-                                                                                                              2)),
-                                                                                             math.trunc(round(df7.iloc[
-                                                                                                                  prev_month_fy, i],
-                                                                                                              2))))
-    except:
-        pass
 
-    st.write('\n')
-    st.write('MONTH-TO-MONTH FEMALE')
-    try:
-        for i in range(8, 15):
-            if (df7.iloc[current_month_fy, i] / df7.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write('The female {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                               fy22[current_month_fy],
-                                                                                               math.trunc(round((
-                                                                                                                            df7.iloc[
-                                                                                                                                current_month_fy, i] /
-                                                                                                                            df7.iloc[
-                                                                                                                                prev_month_fy, i]) - 1,
-                                                                                                                2) * 100),
-                                                                                               fy22[prev_month_fy],
-                                                                                               math.trunc(round(
-                                                                                                   df7.iloc[
-                                                                                                       current_month_fy, i],
-                                                                                                   2)),
-                                                                                               math.trunc(round(
-                                                                                                   df7.iloc[
-                                                                                                       prev_month_fy, i],
-                                                                                                   2))))
-            else:
-                st.write('The female {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i],
-                                                                                               fy22[current_month_fy],
-                                                                                               math.trunc(round((
-                                                                                                                            df7.iloc[
-                                                                                                                                current_month_fy, i] /
-                                                                                                                            df7.iloc[
-                                                                                                                                prev_month_fy, i]) - 1,
-                                                                                                                2) * 100),
-                                                                                               fy22[prev_month_fy],
-                                                                                               math.trunc(round(
-                                                                                                   df7.iloc[
-                                                                                                       current_month_fy, i],
-                                                                                                   2)),
-                                                                                               math.trunc(round(
-                                                                                                   df7.iloc[
-                                                                                                       prev_month_fy, i],
-                                                                                                   2))))
-    except:
-        pass
+    det_adp_ytd_pct_change = math.trunc(round((((df7.loc['FY22 Total', ('Total', 'ADP')]) / (df7.loc['FY21 Total', ('Total', 'ADP')]) - 1) * 100), 2))
+
+    if det_admissions_ytd_pct_change > 0:
+        st.write('Detention ADP through the first {} months of {} increased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
+                                                                                   month_index_cur() + 1,
+                                                                                   fy_current,
+                                                                                   det_adp_ytd_pct_change,
+                                                                                   round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
+                                                                                   fy_previous,
+                                                                                   round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
+    else:
+        st.write('Detention ADP through the first {} months of {} decreased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
+                                                                                   month_index_cur() + 1,
+                                                                                   fy_current,
+                                                                                   det_adp_ytd_pct_change,
+                                                                                   round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
+                                                                                   fy_previous,
+                                                                                   round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
+
+
+    def paragraph_perc(df, col1, col2, dir):
+        '''
+        enter df and col names and (up or down) for pos. or neg. table
+        :param df:
+        :param col1:
+        :param col2:
+        :param dir:
+        :return:
+        '''
+        if dir == 'up':
+            up = df[df[col2] > 0]
+            p_list = []
+            for i, j in zip(up[col1], up[col2]):
+                p_list.append('{} (up {}%),'.format(i, round(j * 100)))
+            return st.write(' '.join(p_list))
+
+        if dir == 'down':
+            down = df[df[col2] < 0]
+            p_list = []
+            for i, j in zip(down[col1], down[col2]):
+                p_list.append('{} (up {}%),'.format(i, round(j * 100)))
+            return st.write(' '.join(p_list))
+
+
 
     # Caseloads
+    st.markdown("---")
     st.write('\n')
     st.title('***Caseloads MTM***')
     st.write('\n')
-    
+
+
     caseload_dict = {}
     cl_name = []
     cl_perc = []
 
-       
-    try:
-        for i in range(0, 18):
-            if (df8.iloc[current_month_fy, i] / df8.iloc[prev_month_fy, i]) - 1 > 0:
-                   st.write('The average daily officer caseloads for the {} unit increased by {}% in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
-                                                                                                 math.trunc(round((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                                                                                                 fy22[current_month_fy], 
-                                                                                                 fy22[prev_month_fy],                                         
-                                                                                                 (round(df8.iloc[current_month_fy, i], 1)), 
-                                                                                                 (round(df8.iloc[prev_month_fy, i], 1))))
+    for i in range(0, 18):
+        try:
+            if (df8.iloc[month_index_cur(), i] / df8.iloc[month_index_prev(), i]) - 1 > 0:
                    cl_name.append(df8.columns[i])
-                   cl_perc.append((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1)
+                   cl_perc.append((df8.iloc[month_index_cur(), i]/df8.iloc[month_index_prev(), i]) - 1)
             else:
-                st.write('The average daily officer caseloads for the {} unit decreased by {}%  in {}, compared to {} ({} vs. {})'.format(df8.columns[i],
-                                                                                          math.trunc(round((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy], 
-                                                                                          fy22[prev_month_fy],                                         
-                                                                                          (round(df8.iloc[current_month_fy, i], 1)), 
-                                                                                          (round(df8.iloc[prev_month_fy, i], 1))))
                 cl_name.append(df8.columns[i])
-                cl_perc.append((df8.iloc[current_month_fy, i]/df8.iloc[prev_month_fy, i]) - 1)
+                cl_perc.append((df8.iloc[month_index_cur(), i]/df8.iloc[month_index_prev(), i]) - 1)
 
-    except:
-        pass
+        except:
+            pass
 
     caseload_dict ['Caseload Name'] = cl_name
     caseload_dict ['Caseload Perc. Change (MTM)'] = cl_perc
-       
+
     # MTM
     cls = pd.DataFrame(caseload_dict).sort_values(by='Caseload Perc. Change (MTM)', ascending=False)
+
+    st.write('The average daily caseloads for the following units increased in {} compared to the previous month:'.format(report_month_cur()))
+    # cls_up = cls[cls['Caseload Perc. Change (MTM)'] > 0]
+    # cls_p = []
+    # for i, j in zip(cls_up['Caseload Name'], cls_up['Caseload Perc. Change (MTM)']):
+    #     cls_p.append('{} (up {}%),'.format(i, round(j * 100, 2)))
+    #
+    # st.write(' '.join(cls_p))
+    paragraph_perc(cls, 'Caseload Name', 'Caseload Perc. Change (MTM)', 'up')
+
+    st.write('---')
+
     st.subheader('Caseloads MTM Percent Change - Increases')
     st.write(cls[cls['Caseload Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
     st.subheader('Caseloads MTM Percent Change -  Decreases')
     st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
-       
+    st.write('---')
+
     st.write('\n')
     st.title('***Caseloads YTD***')
     st.write('\n')
@@ -682,95 +966,218 @@ if uploaded_file is not None:
     cl_name2 = []
     cl_perc2 = []
 
-       
-    try:
-       for i in range(0, 18):
+    for i in range(0, 18):
+        try:
             if (df8.iloc[-2, i] / df8.iloc[-1, i]) - 1 > 0:
-                st.write('The daily officer caseloads for the {} unit increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
-                                                                                          math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy], 
-                                                                                          (round(df8.iloc[-2, i], 1)), 
-                                                                                          (round(df8.iloc[-1, i], 1))))
                 cl_name2.append(df8.columns[i])
                 cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
             else:
-                st.write('The average daily officer caseloads for the {} unit decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df8.columns[i],
-                                                                                          math.trunc(round((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy], 
-                                                                                          (round(df8.iloc[-2, i], 1)), 
-                                                                                          (round(df8.iloc[-1, i], 1))))
                 cl_name2.append(df8.columns[i])
                 cl_perc2.append((df8.iloc[-2, i]/df8.iloc[-1, i]) - 1)
-    except:
-        pass 
-       
+        except:
+            pass
+
     caseload_dict2 ['Caseload Name'] = cl_name2
-    caseload_dict2 ['Caseload Perc. Change (YTD)'] = cl_perc2  
-       
+    caseload_dict2 ['Caseload Perc. Change (YTD)'] = cl_perc2
+
     # YTD
+    st.write('The units with a higher average daily officer caseload through {} compared to the previous year-to-date were:'.format(report_month_cur()))
+
     cls2 = pd.DataFrame(caseload_dict2).sort_values(by='Caseload Perc. Change (YTD)', ascending=False)
+
+    paragraph_perc(cls2, 'Caseload Name', 'Caseload Perc. Change (YTD)', 'up')
+
+    most_decr_unit = \
+    cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').iloc[0].values[0]
+
+    most_decr_unit_perc = \
+    cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').iloc[0].values[1]
+
+    st.write(
+    'The unit with the most significant decrease in average daily officer caseload in {} is the {} Unit, down {}% compared to {}.'.format(
+        fy_current,
+        most_decr_unit,
+        abs(round(most_decr_unit_perc * 100)),
+        fy_previous
+    ))
+
+    st.write('---')
+
     st.subheader('Caseloads YTD Percent Change - Increases')
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
 
     st.subheader('Caseloads YTD Percent Change -  Decreases')
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
-       
 
-       
+    st.write('---')
+
     st.write('\n')
-    st.title('***Supervision MTM***')
+    st.title('***Supervisions***')
     st.write('\n')
 
-    try:
-        for i in range(0, 6):
-            if (df9.iloc[current_month_fy, i] / df9.iloc[prev_month_fy, i]) - 1 > 0:
+    sup_list = []
+
+    if round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Pre-Disposition')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Pre-Disposition')]) - 1)*100) > 0:
+        sup_list.append('Compared to the previous month, in {}, the number of those on Pre-Disposition supervision increased by {}%,'.format(
+         report_month_cur(),
+          abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Pre-Disposition')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Pre-Disposition')]) - 1)*100)
+        )))
+    else:
+        sup_list.append(
+            'Compared to the previous month, in {}, the number of those on Pre-Disposition supervision decreased by {}%,'.format(
+                report_month_cur(),
+                abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Pre-Disposition')] / df9.iloc[
+                    month_index_prev(), df9.columns.get_loc('Pre-Disposition')]) - 1) * 100)
+                    )))
+
+    if round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Deferred Prosecution')]) - 1)*100) > 0:
+        sup_list.append('Deferred Prosecution increased by {}%,'.format(
+          abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Deferred Prosecution')]) - 1)*100)
+        )))
+    else:
+        sup_list.append(
+            'Deferred Prosecution decreased by {}%,'.format(
+                abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[
+                    month_index_prev(), df9.columns.get_loc('Deferred Prosecution')]) - 1) * 100)
+                    )))
+
+    if round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1)*100) > 0:
+        sup_list.append('non-ISP Probation increased by {}%,'.format(
+          abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1)*100)
+        )))
+    else:
+        sup_list.append('non-ISP Probation decreased by {}%,'.format(
+                abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[
+                    month_index_prev(), df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1) * 100)
+                    )))
+
+    if round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1)*100) > 0:
+        sup_list.append('and ISP Probation increased by {}%.'.format(
+          abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[month_index_prev(), df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1)*100)
+        )))
+    else:
+        sup_list.append('and ISP Probation decreased by {}%.'.format(
+                abs(round(((df9.iloc[month_index_cur(), df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[
+                    month_index_prev(), df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1) * 100)
+                    )))
+
+
+    st.write(' '.join(sup_list))
+
+
+    # Supervision YTD text
+    sup_list2 = []
+    if month_index_cur() == 11:
+        sup_list2.append('When looking at the entire fiscal year,')
+    else:
+        sup_list2.append('Through the first {} months of {}'.format(month_index_cur()+1, fy_current ))
+
+    if round(((df9.iloc[-2, df9.columns.get_loc('Pre-Disposition')] / df9.iloc[-1, df9.columns.get_loc('Pre-Disposition')]) - 1) * 100) > 0:
+        sup_list2.append('the average daily number of youths on Pre-Disposition supervision increased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Pre-Disposition')] / df9.iloc[
+                -1, df9.columns.get_loc('Pre-Disposition')]) - 1) * 100))))
+    else:
+        sup_list2.append('the average daily number of youths on Pre-Disposition supervision decreased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Pre-Disposition')] / df9.iloc[
+                -1, df9.columns.get_loc('Pre-Disposition')]) - 1) * 100))))
+
+    if round(((df9.iloc[-2, df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[ -1, df9.columns.get_loc('Deferred Prosecution')]) - 1) * 100) > 0:
+        sup_list2.append('Deferred Prosecution increased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[
+                -1, df9.columns.get_loc('Deferred Prosecution')]) - 1) * 100))
+        ))
+    else:
+        sup_list2.append('Deferred Prosecution decreased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Deferred Prosecution')] / df9.iloc[
+                -1, df9.columns.get_loc('Deferred Prosecution')]) - 1) * 100))
+        ))
+
+    if round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[-1, df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1) * 100) > 0:
+        sup_list2.append('non-ISP Probation increased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[
+                -1, df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1) * 100))
+        ))
+    else:
+        sup_list2.append('non-ISP Probation decreased by {}%,'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (Non-ISP)')] / df9.iloc[
+                -1, df9.columns.get_loc('Adjudication Probation (Non-ISP)')]) - 1) * 100))
+        ))
+
+    if round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[-1, df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1) * 100) > 0:
+        sup_list2.append('and ISP Probation increased by {}%.'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[
+                -1, df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1) * 100))
+        ))
+    else:
+        sup_list2.append('and ISP Probation decreased by {}%.'.format(
+            abs(round(((df9.iloc[-2, df9.columns.get_loc('Adjudication Probation (ISP)')] / df9.iloc[
+                -1, df9.columns.get_loc('Adjudication Probation (ISP)')]) - 1) * 100))
+        ))
+
+    st.write(' '.join(sup_list2))
+
+
+    st.write('---')
+    st.subheader('***Supervision MTM***')
+
+    for i in range(0, 6):
+        try:
+            if (df9.iloc[month_index_cur(), i] / df9.iloc[month_index_prev(), i]) - 1 > 0:
                 st.write(
                     'The average daily number of youths on {} Supervision in {} increased by {}% compared to {}, ({} vs. {})'.format(
                         df9.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df9.iloc[current_month_fy, i] / df9.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[prev_month_fy],
-                        math.trunc(round(df9.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df9.iloc[prev_month_fy, i], 2))))
+                        report_month_cur(),
+                        math.trunc(round((df9.iloc[month_index_cur(), i] / df9.iloc[month_index_prev(), i]) - 1, 2) * 100),
+                        report_month_prev(),
+                        math.trunc(round(df9.iloc[month_index_cur(), i], 2)),
+                        math.trunc(round(df9.iloc[month_index_prev(), i], 2))))
             else:
                 st.write(
                     'The average daily number of youths on {} Supervision in {} decreased by {}% compared to {}, ({} vs. {})'.format(
                         df9.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df9.iloc[current_month_fy, i] / df9.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[prev_month_fy],
-                        math.trunc(round(df9.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df9.iloc[prev_month_fy, i], 2))))
-    except:
-        pass
+                        report_month_cur(),
+                        math.trunc(round((df9.iloc[month_index_cur(), i] / df9.iloc[month_index_prev(), i]) - 1, 2) * 100),
+                        report_month_prev(),
+                        math.trunc(round(df9.iloc[month_index_cur(), i], 2)),
+                        math.trunc(round(df9.iloc[month_index_prev(), i], 2))))
+        except:
+            pass
 
     st.write('\n')
-    st.title('***Supervision YTD***')
+    st.subheader('***Supervision YTD***')
     st.write('\n')
 
-    try:
-        for i in range(0, 6):
+    for i in range(0, 6):
+        try:
             if (df9.iloc[-2, i] / df9.iloc[-1, i]) - 1 > 0:
                 st.write(
-                    'The average daily number of youths on {} Supervision increased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
+                    'The average daily number of youths on {} Supervision increased by {}% through {} {} YTD, compared to {} YTD ({} vs. {})'.format(
                         df9.columns[i],
                         math.trunc(round((df9.iloc[-2, i] / df9.iloc[-1, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
+                        report_month_cur(),
+                        fy_current,
+                        fy_previous,
                         math.trunc(round(df9.iloc[-2, i], 2)),
                         math.trunc(round(df9.iloc[-1, i], 2))))
             else:
                 st.write(
-                    'The average daily number of youths on {} Supervision decreased by {}% through {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(
+                    'The average daily number of youths on {} Supervision decreased by {}% through {} {} YTD, compared to {} YTD ({} vs. {})'.format(
                         df9.columns[i],
                         math.trunc(round((df9.iloc[-2, i] / df9.iloc[-1, i]) - 1, 2) * 100),
-                        fy22[current_month_fy],
+                        report_month_cur(),
+                        fy_current,
+                        fy_previous,
                         math.trunc(round(df9.iloc[-2, i], 2)),
                         math.trunc(round(df9.iloc[-1, i], 2))))
-    except:
-        pass
+        except:
+            pass
 
+
+
+    st.markdown("---")
     st.write('\n')
-    st.title('***Internal Placement ADP MTM***')
+    st.title('***Internal Placement***')
+    st.subheader('ADP MTM')
     st.write('\n')
 
     int_pl_dict = {}
@@ -779,42 +1186,53 @@ if uploaded_file is not None:
 
     for i in range(7, 107, 9):
         try:
-            if (df10.iloc[current_month_fy, i] / df10.iloc[prev_month_fy, i]) - 1 > 0:
-                st.write('The ADP for {} increased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                          math.trunc(round((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy],
-                                                                                          fy22[prev_month_fy],
-                                                                                          (round(df10.iloc[current_month_fy, i], 1)), 
-                                                                                          (round(df10.iloc[prev_month_fy, i], 1))))
+            if (df10.iloc[month_index_cur(), i] / df10.iloc[month_index_prev(), i]) - 1 > 0:
                 pl_name.append(df10.columns[i])
-                pl_perc.append((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1)
-            
+                pl_perc.append((df10.iloc[month_index_cur(), i]/df10.iloc[month_index_prev(), i]) - 1)
+
             else:
-                st.write('The ADP for {} decreased by {}% in {}, compared to {} ({} vs. {})'.format(df10.columns[i],
-                                                                                          math.trunc(round((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy],
-                                                                                          fy22[prev_month_fy],
-                                                                                          (round(df10.iloc[current_month_fy, i], 1)), 
-                                                                                          (round(df10.iloc[prev_month_fy, i], 1))))
                 pl_name.append(df10.columns[i])
-                pl_perc.append((df10.iloc[current_month_fy, i]/df10.iloc[prev_month_fy, i]) - 1)
-            
+                pl_perc.append((df10.iloc[month_index_cur(), i]/df10.iloc[month_index_prev(), i]) - 1)
+
         except:
             pass
-       
+
     int_pl_dict ['Placement'] = pl_name
-    int_pl_dict ['Placement Perc. Change (MTM)'] = pl_perc     
+    int_pl_dict ['Placement Perc. Change (MTM)'] = pl_perc
+
     # MTM
     int_pl = pd.DataFrame(int_pl_dict).sort_values(by='Placement Perc. Change (MTM)', ascending=False)
+    int_pl_up = int_pl[int_pl['Placement Perc. Change (MTM)'] > 0]
+    int_pl_up_p = []
+
+    int_pl_up_p.append('In {}, the following facilities had an increase in their ADP compared to the previous month:'.format(report_month_cur()))
+
+    for i, j in zip(int_pl_up['Placement'], int_pl_up['Placement Perc. Change (MTM)']):
+        int_pl_up_p.append('{} (up {}%),'.format(i[:-5], round(j * 100)))
+
+    st.write(' '.join(int_pl_up_p))
+
+    int_pl_down = int_pl[int_pl['Placement Perc. Change (MTM)'] < 0].sort_values('Placement Perc. Change (MTM)')
+    int_pl_down['Placement Perc. Change (MTM)'] = int_pl_down['Placement Perc. Change (MTM)'].abs()
+    int_pl_down_p = []
+
+    int_pl_down_p.append('The following facilities saw a decrease in their ADP compared to the previous month:')
+    for i, j in zip(int_pl_down['Placement'], int_pl_down['Placement Perc. Change (MTM)']):
+        int_pl_down_p.append('{} (down {}%),'.format(i[:-5], round(j * 100)))
+
+    st.write(' '.join(int_pl_down_p))
+    st.write('---')
+
+
     st.subheader('Internal Placement ADP MTM - Increases')
     st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
     st.subheader('Internal Placement ADP MTM - Decreases')
     st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] < 0].sort_values(by='Placement Perc. Change (MTM)').reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
-       
-       
-       
+    st.write('---')
+
+
     st.write('\n')
-    st.title('***Internal Placement ADP YTD***')
+    st.subheader('***Internal Placement ADP YTD***')
     st.write('\n')
 
     int_pl_dict2 = {}
@@ -824,217 +1242,334 @@ if uploaded_file is not None:
     for i in range(7, 107, 9):
         try:
             if (df10.iloc[-2, i] / df10.iloc[-1, i]) - 1 > 0:
-                st.write('The ADP for {} increased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
-                                                                                          math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy],
-                                                                                          (round(df10.iloc[-2, i], 1)), 
-                                                                                          (round(df10.iloc[-1, i], 1))))
                 pl_name2.append(df10.columns[i])
                 pl_perc2.append((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1)
-            
+
             else:
-                st.write('The ADP for {} decreased by {}% in {} FY2022 YTD, compared to FY2021 YTD ({} vs. {})'.format(df10.columns[i],
-                                                                                          math.trunc(round((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1, 2) * 100),
-                                                                                          fy22[current_month_fy],
-                                                                                          (round(df10.iloc[-2, i], 1)), 
-                                                                                          (round(df10.iloc[-1, i], 1))))
                 pl_name2.append(df10.columns[i])
                 pl_perc2.append((df10.iloc[-2, i]/df10.iloc[-1, i]) - 1)
-            
+
         except:
             pass
 
-    int_pl_dict2 ['Placement Name'] = pl_name2
+    int_pl_dict2 ['Placement'] = pl_name2
     int_pl_dict2 ['Placement Perc. Change (YTD)'] = pl_perc2
 
     # YTD
     int_pl2 = pd.DataFrame(int_pl_dict2).sort_values(by='Placement Perc. Change (YTD)', ascending=False)
+    int_pl_up_p2 = []
+
+    if month_index_cur() == 11:
+        int_pl_up_p2.append('When comparing each facility’s {} ADP to that of the previous fiscal year, the following facilities had an increase:'.format(fy_current))
+    else:
+        int_pl_up_p2.append('When comparing each facility’s ADP for the first {} months of {} to the same months of the previous fiscal year, the following facilities had an increase:'.format(month_index_cur()+1, fy_current))
+
+    int_pl_up2 = int_pl2[int_pl2['Placement Perc. Change (YTD)'] > 0]
+    for i, j in zip(int_pl_up2['Placement'], int_pl_up2['Placement Perc. Change (YTD)']):
+        int_pl_up_p2.append('{} (up {}%),'.format(i[:-5], round(j * 100)))
+
+    st.write(' '.join(int_pl_up_p2))
+
+    # Internal Placement YTD decreases
+    int_pl_down_p2 = []
+
+    if month_index_cur() == 11:
+        int_pl_down_p2.append('Compared to {},'.format(fy_previous))
+    else:
+        int_pl_down_p2.append('Compared to the same months of the previous fiscal year,')
+
+
+    int_pl_down2 = int_pl2[int_pl2['Placement Perc. Change (YTD)'] < 0]
+    for i, j in zip(int_pl_down2['Placement'], int_pl_down2['Placement Perc. Change (YTD)']):
+        int_pl_down_p2.append('{} (down {}%),'.format(i[:-5], abs(round(j * 100))))
+
+    st.write(' '.join(int_pl_down_p2))
+
+    st.write('---')
     st.subheader('Internal Placement ADP YTD - Increases')
     st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
     st.subheader('Internal Placement ADP YTD - Decreases')
     st.write(int_pl2[int_pl2['Placement Perc. Change (YTD)'] < 0].sort_values(by='Placement Perc. Change (YTD)').reset_index(drop=True).style.format({'Placement Perc. Change (YTD)': '{:,.2%}'.format}))
 
 
+
+    st.markdown("---")
     st.write('\n')
     st.title('***Contract Placement***')
     st.write('\n')
 
-    st.write('({}) youth were served at contract placement facilities in {}.'.format(df11.iloc[current_month_fy, 0],
-                                                                                  fy22[current_month_fy]))
-    st.write('There were ({}) admissions during {}.'.format(df11.iloc[current_month_fy, 1], fy22[current_month_fy]))
-    st.write('There were ({}) exits during {}.'.format(df11.iloc[current_month_fy, 2], fy22[current_month_fy]))
+    con_place_list = []
 
-    st.write('\n')
-    st.write('***Psych/Clinical Services***')
-    st.write('\n')
+    con_place_list.append('({}) youth were served at contract placement facilities in {}, including {} admissions during {}.'.format(df11.iloc[month_index_cur(), 0],
+                                                                                                               report_month_cur(),
+                                                                                                               df11.iloc[month_index_cur(), 1],
+                                                                                                               report_month_cur()
+                                                                                                               ))
 
-    if (df12.iloc[current_month_fy, -1] / df12.iloc[prev_month_fy, -1]) - 1 > 0:
-        st.write(
-            '({}) Psychological Services Referrals were made in {}, a {}% increase compared to  {} ({} vs. {})'.format(
-                df12.iloc[current_month_fy, -1],
-                fy22[current_month_fy],
-                math.trunc(round((df12.iloc[current_month_fy, -1] / df12.iloc[prev_month_fy, -1]) - 1, 2) * 100),
-                fy22[prev_month_fy],
-                math.trunc(round(df12.iloc[current_month_fy, -1])),
-                math.trunc(round(df12.iloc[prev_month_fy, -1]))))
+    con_place_list.append('Specifically,')
+    new_youth_plc = df11[df11.columns[df11.columns.str.contains('Youth Served')]].iloc[month_index_prev():month_index_cur() + 1, 1:].diff().dropna().T
+    new_youth_plc = new_youth_plc[new_youth_plc.SEP > 0]
+
+    for index, value in zip(new_youth_plc.index, new_youth_plc.values.flatten()):
+        con_place_list.append('{} youth was admitted to {}, '.format(value, index[:-14]))
+
+    con_place_list.append('There were {} exits from contract placement facilities during {}.'.format(df11.iloc[month_index_cur(), 2], report_month_cur()))
+
+    st.write(' '.join(con_place_list))
+
+    con_place_list2 = []
+
+    if month_index_cur() == 11:
+        con_place_list2.append('The FY2022 contract placement ADP'.format(fy_previous))
     else:
-        st.write('({}) Psychological Services Referrals were made in {}, a {}% decrease compared to {} ({} vs. {})'.format(
-            df12.iloc[current_month_fy, -1],
-            fy22[current_month_fy],
-            math.trunc(round((df12.iloc[current_month_fy, -1] / df12.iloc[prev_month_fy, -1]) - 1, 2) * 100),
-            fy22[prev_month_fy],
-            math.trunc(round(df12.iloc[current_month_fy, -1])),
-            math.trunc(round(df12.iloc[prev_month_fy, -1]))))
+        con_place_list2.append('The contract placement YTD ADP through {}'.format(report_month_cur()))
+
+    if df11['All External Facilities: ADP'][-2] > df11['All External Facilities: ADP'][-1]:
+        con_place_list2.append(
+            'was {}, {}% above that of the previous fiscal year’s first {} months ({}).'.format(
+                round(df11['All External Facilities: ADP'][-2], 1),
+                int(((df11['All External Facilities: ADP'][-2] / df11['All External Facilities: ADP'][-1]) - 1) * 100),
+                month_index_cur() + 1,
+                round(df11['All External Facilities: ADP'][-1], 1)))
+    else:
+        con_place_list2.append(
+            'was {}, {}% below that of the previous fiscal year’s first {} months ({}).'.format(
+                round(df11['All External Facilities: ADP'][-2], 1),
+                int(((df11['All External Facilities: ADP'][-2] / df11['All External Facilities: ADP'][-1]) - 1) * 100),
+                month_index_cur() + 1,
+                round(df11['All External Facilities: ADP'][-1], 1)))
+
+    st.write(' '.join(con_place_list2))
+
+    st.markdown('---')
+    st.write('\n')
+    st.title('***Psych/Clinical Services***')
+    st.write('\n')
+
+    psych_list = []
+
+    if (df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1 > 0:
+        psych_list.append(
+            '{} Psychological Services Referrals were made in {}, a {}% increase compared to  {} ({} vs. {}).'.format(
+                df12.iloc[month_index_cur(), -1],
+                report_month_cur(),
+                math.trunc(round((df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1, 2) * 100),
+                report_month_prev(),
+                math.trunc(round(df12.iloc[month_index_cur(), -1])),
+                math.trunc(round(df12.iloc[month_index_prev(), -1]))))
+    else:
+        psych_list.append('({}) Psychological Services Referrals were made in {}, a {}% decrease compared to {} ({} vs. {})'.format(
+            df12.iloc[month_index_cur(), -1],
+            report_month_cur(),
+            math.trunc(round((df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1, 2) * 100),
+            report_month_prev(),
+            math.trunc(round(df12.iloc[month_index_cur(), -1])),
+            math.trunc(round(df12.iloc[month_index_prev(), -1]))))
+
+    psych_list.append('The number of Psychological Service Referrals made')
+    if month_index_cur() == 11:
+        psych_list.append('in {}'.format(fy_current))
+    else:
+        psych_list.append('through the first {} months of {}'.format(month_index_cur()+1, fy_current))
 
     if (df12.iloc[-2, -1] / df12.iloc[-1, -1]) - 1 > 0:
-        st.write(
-            'The number of Psychological Service Referrals made through the first {} months of FY2022 are up {}% compared to the same months in FY2021.'.format(
-                current_month_fy + 1,
-                math.trunc(round((df12.iloc[-2, -1] / df12.iloc[-1, -1]) - 1, 2) * 100)))
+        psych_list.append(
+            ' are up {}% compared to the same months in {}.'.format(
+                round_pct_change(df12.iloc[-2, -1], df12.iloc[-1, -1]),
+                fy_previous))
     else:
-        st.write(
-            'The number of Psychological Service Referrals made through the first {} months of FY2022 are down {}% compared to the same months in FY2021.'.format(
-                current_month_fy + 1,
-                math.trunc(round((df12.iloc[-2, -1] / df12.iloc[-1, -1]) - 1, 2) * 100)))
+        psych_list.append(
+            'are down {}% compared to the same months in {}.'.format(
+                round_pct_change(df12.iloc[-2, -1], df12.iloc[-1, -1]),
+                fy_previous))
 
+    st.write(' '.join(psych_list))
+
+
+    psych_list2 = []
+    if round_pct_change(df13.iloc[month_index_cur(), df13.columns.get_loc('Total')], df13.iloc[month_index_prev(), df13.columns.get_loc('Total')]) > 0:
+        psych_list2.append(
+            'The number of Behavioral Health Services Referrals made during {} increased by {}% compared to the previous month.'.format(
+                report_month_cur(),
+                abs(round_pct_change(df13.iloc[month_index_cur(), df13.columns.get_loc('Total')],
+                                     df13.iloc[month_index_prev(), df13.columns.get_loc('Total')]))
+            ))
+    else:
+        psych_list2.append(
+            'The number of Behavioral Health Services Referrals made during {} decreased by {}% compared to the previous month.'.format(
+                report_month_cur(),
+                abs(round_pct_change(df13.iloc[month_index_cur(), df13.columns.get_loc('Total')],
+                                     df13.iloc[month_index_prev(), df13.columns.get_loc('Total')]))
+            ))
+
+    st.write(' '.join(psych_list2))
+
+
+    st.write('---')
     st.write('\n')
-    st.write('***Psych/Clinical Services YTD***')
+    st.subheader('***Psychological Services Referrals YTD***')
 
     for i in range(0, df12.shape[1]):
         try:
             if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
                 st.write(
-                    'There was a {}% increase for {} referrals during the first {} months of FY2022 YTD, compared to the same months in FY2021. ({} vs. {})'.format(
+                    'There was a {}% increase for {} referrals during the first {} months of {} YTD, compared to the same months in {}. ({} vs. {})'.format(
                         math.trunc(round((df12.iloc[-2, i] / df12.iloc[-1, i]) - 1, 2) * 100),
                         df12.columns[i],
-                        current_month_fy + 1,
+                        month_index_cur() + 1,
+                        fy_current,
+                        fy_previous,
                         math.trunc(round(df12.iloc[-2, i], 2)),
-                        math.trunc(round(df12.iloc[-1, i], 2))))
+                        math.trunc(round(df12.iloc[-1, i], 2))
+                        ))
             else:
                 st.write(
-                    'There was a {}% decrease for {} referrals during the first {} months of FY2022 YTD, compared to the same months in FY2021. ({} vs. {})'.format(
+                    'There was a {}% decrease for {} referrals during the first {} months of {} YTD, compared to the same months in {}. ({} vs. {})'.format(
                         math.trunc(round((df12.iloc[-2, i] / df12.iloc[-1, i]) - 1, 2) * 100),
                         df12.columns[i],
-                        current_month_fy + 1,
+                        month_index_cur() + 1,
+                        fy_current,
+                        fy_previous,
                         math.trunc(round(df12.iloc[-2, i], 2)),
-                        math.trunc(round(df12.iloc[-1, i], 2))))
+                        math.trunc(round(df12.iloc[-1, i], 2))
+                        ))
         except ZeroDivisionError:
             pass
 
-    st.write('\n')
-    st.write('***Psych/Behavioral Health Services Referrals MTM***')
+    st.write('---')
+    st.subheader('***Behavioral Health Services Referrals MTM***')
 
     for i in range(0, df13.shape[1]):
         try:
 
-            if (df13.iloc[current_month_fy, i] / df13.iloc[current_month_fy, i]) - 1 > 0:
+            if (df13.iloc[month_index_cur(), i] / df13.iloc[month_index_cur(), i]) - 1 > 0:
                 st.write(
-                    'Behavioral Health Services: {} Referrals made during {} were up {}% compared to {} ({} vs. {}).'.format(
+                    '{} Referrals made during {} were up {}% compared to {} ({} vs. {}).'.format(
                         df13.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df13.iloc[current_month_fy, i] / df13.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[prev_month_fy],
-                        math.trunc(round(df13.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df13.iloc[prev_month_fy, i], 2))))
+                        report_month_cur(),
+                        math.trunc(round((df13.iloc[month_index_cur(), i] / df13.iloc[month_index_prev(), i]) - 1, 2) * 100),
+                        report_month_prev(),
+                        math.trunc(round(df13.iloc[month_index_cur(), i], 2)),
+                        math.trunc(round(df13.iloc[month_index_prev(), i], 2))))
             else:
                 st.write(
-                    'Behavioral Health Services: {} Referrals made during {} were down {}% compared to {} ({} vs. {}).'.format(
+                    '{} Referrals made during {} were down {}% compared to {} ({} vs. {}).'.format(
                         df13.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df13.iloc[current_month_fy, i] / df13.iloc[prev_month_fy, i]) - 1, 2) * 100),
-                        fy22[prev_month_fy],
-                        math.trunc(round(df13.iloc[current_month_fy, i], 2)),
-                        math.trunc(round(df13.iloc[prev_month_fy, i], 2))))
+                        report_month_cur(),
+                        math.trunc(round((df13.iloc[month_index_cur(), i] / df13.iloc[month_index_prev(), i]) - 1, 2) * 100),
+                        report_month_prev(),
+                        math.trunc(round(df13.iloc[month_index_cur(), i], 2)),
+                        math.trunc(round(df13.iloc[month_index_prev(), i], 2))))
         except ZeroDivisionError:
             pass
 
     st.write('\n')
-    st.write('***Psych/Behavioral Health Services Referrals YTD***')
+    st.subheader('***Behavioral Health Services Referrals YTD***')
 
     for i in range(0, df13.shape[1]):
         try:
 
             if (df13.iloc[-2, i] / df13.iloc[-1, i]) - 1 > 0:
                 st.write(
-                    'Behavioral Health Services: {} Referrals made through {} FY2022 YTD were up {}% compared to FY2021 YTD ({} vs. {}).'.format(
+                    '{} Referrals made through {} {} YTD were up {}% compared to {} YTD ({} vs. {}).'.format(
                         df13.columns[i],
-                        fy22[current_month_fy],
+                        report_month_cur(),
+                        fy_current,
                         math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
+                        fy_previous,
                         math.trunc(round(df13.iloc[-2, i], 2)),
                         math.trunc(round(df13.iloc[-1, i], 2))))
             else:
                 st.write(
-                    'Behavioral Health Services: {} Referrals made through {} FY2022 YTD were down {}% compared to FY2021 YTD ({} vs. {}).'.format(
+                    '{} Referrals made through {} {} YTD were down {}% compared to {} YTD ({} vs. {}).'.format(
                         df13.columns[i],
-                        fy22[current_month_fy],
+                        report_month_cur(),
+                        fy_current,
                         math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
+                        fy_previous,
                         math.trunc(round(df13.iloc[-2, i], 2)),
                         math.trunc(round(df13.iloc[-1, i], 2))))
         except ZeroDivisionError:
             pass
 
     st.write('\n')
-    st.write('***Psych/Clinical Service Referral Outcomes YTD***')
+    st.subheader('***Clinical Service Referral Outcomes YTD***')
     st.write(
-        'Through the first {} months of FY2022, {}% of all Psychological Services Referrals had a completed outcome,'.format(
-            current_month_fy + 1,
+        'Through the first {} months of {}, {}% of all Psychological Services Referrals had a completed outcome,'.format(
+            month_index_cur() + 1,
+            fy_current,
             math.trunc(round(df14.iloc[-2, 0], 2) * 100),
             ))
     st.write(
-        'Through the first {} months of FY2021, {}% of all Psychological Services Referrals had a completed outcome,'.format(
-            current_month_fy + 1,
+        'Through the first {} months of {}, {}% of all Psychological Services Referrals had a completed outcome,'.format(
+            month_index_cur() + 1,
+            fy_previous,
             math.trunc(round(df14.iloc[-1, 0], 2) * 100),
             ))
     st.write(
-        'Through the first {} months of FY2022, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
-            current_month_fy + 1,
+        'Through the first {} months of {}, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
+            month_index_cur() + 1,
+            fy_current,
             math.trunc(round(df14.iloc[-2, 1], 2) * 100),
             ))
     st.write(
-        'Through the first {} months of FY2021, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
-            current_month_fy + 1,
+        'Through the first {} months of {}, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
+            month_index_cur() + 1,
+            fy_previous,
             math.trunc(round(df14.iloc[-1, 1], 2) * 100),
             ))
-    st.write('\n')
-    st.write('***Education***')
-    st.write('\n')
 
-    st.write(
-        'The Dallas County JJAEP had seventeen ({}) admissions in January 2022.'.format(df15.iloc[current_month_fy, 4]))
+
+
+    st.markdown("---")
+    st.title('***Education***')
+
+    st.write('The Dallas County JJAEP had {} admissions in {}.'.format(int(df15.iloc[month_index_cur(), 4]), report_month_cur()))
+
+    st.write('Of the youth served, {}% were Mandatory admissions, {}% were Discretionary, and {}% was Other.'.format(
+        round((df15.iloc[month_index_cur(), 1] / df15.iloc[month_index_cur(), 0]) * 100),
+        round((df15.iloc[month_index_cur(), 2] / df15.iloc[month_index_cur(), 0]) * 100),
+        round((df15.iloc[month_index_cur(), 3] / df15.iloc[month_index_cur(), 0]) * 100)))
+
+    st.write('There were {} total exits from JJAEP in {}, {} of whom discharged successfully, {} unsuccessfully, and {} other.'.format(
+            int(df15.iloc[month_index_cur(), 5]),
+            report_month_cur(),
+            int(df15.iloc[month_index_cur(), 6]),
+            int(df15.iloc[month_index_cur(), 7]),
+            int(df15.iloc[month_index_cur(), 8])
+            ))
+
+    st.write('***[\* INSERT UNSUCCESSFUL EXITS REASONS HERE \*]***')
+
     st.write('\n')
+    st.write('Through {} fiscal YTD: '.format(report_month_cur()))
 
     for i in range(0, 13):
         try:
 
             if (df15.iloc[-2, i] / df15.iloc[-1, i]) - 1 > 0:
                 st.write(
-                    'Dallas County JJAEP had ({}) {} through {}, a {}% increase from the number served during the same months in FY2021 ({} vs. {}).'.format(
-                        df15.iloc[-2, i],
+                    '{}: {}% increase ({}: {} | {}: {})'.format(
                         df15.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df15.iloc[-2, i] / df15.iloc[-1, i]) - 1, 2) * 100),
-                        math.trunc(round(df15.iloc[-2, i], 2)),
-                        math.trunc(round(df15.iloc[-1, i], 2))))
+                        round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i]),
+                        fy_previous,
+                        round(df15.iloc[-1, i]),
+                        fy_current,
+                        round(df15.iloc[-2, i]),
+                    ))
             else:
                 st.write(
-                    'Dallas County JJAEP had ({}) {} through {}, a {}% decrease from the number served during the same months in FY2021 ({} vs. {}).'.format(
-                        df15.iloc[-2, i],
+                    '{}: {}% decrease ({}: {} | {}: {})'.format(
                         df15.columns[i],
-                        fy22[current_month_fy],
-                        math.trunc(round((df15.iloc[-2, i] / df15.iloc[-1, i]) - 1, 2) * 100),
-                        math.trunc(round(df15.iloc[-2, i], 2)),
-                        math.trunc(round(df15.iloc[-1, i], 2))))
+                        abs(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])),
+                        fy_previous,
+                        round(df15.iloc[-1, i]),
+                        fy_current,
+                        round(df15.iloc[-2, i]),
+                    ))
         except ZeroDivisionError:
             pass
 
-    st.write('\n')
-    st.write(
-        'There were ({}) total exits from JJAEP in {}, ({}) of whom discharged successfully, ({}) unsuccessfully, and ({}) other.'.format(
-            df15.iloc[current_month_fy, 5],
-            fy22[current_month_fy],
-            df15.iloc[current_month_fy, 6],
-            df15.iloc[current_month_fy, 7],
-            df15.iloc[current_month_fy, 8]
-            ))
+
 
 
