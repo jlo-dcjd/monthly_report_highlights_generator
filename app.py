@@ -411,19 +411,18 @@ if uploaded_file is not None:
     st.markdown("---")
     st.title('***Referrals***')
     st.write('\n')
+    ref_list_mtm = []
 
     if t_for_refs_pct_chg > 0:
-        st.write(
+        ref_list_mtm.append(
             'The Dallas County Juvenile Department (DCJD) received {} formalized referrals in {}, a {}% increase from the {} in {}.'.format(
                 t_for_refs_ct, report_month_cur(), t_for_refs_pct_chg, t_for_refs_prev, report_month_prev()))
     else:
-        st.write(
+        ref_list_mtm.append(
             'The Dallas County Juvenile Department (DCJD) received {} formalized referrals in {}, a {}% decrease from the {} in {}.'.format(
                 t_for_refs_ct, report_month_cur(), t_for_refs_pct_chg, t_for_refs_prev, report_month_prev()))
 
-    st.write(' ')
 
-    ref_list_mtm = []
 
     if fel_refs_all_pct_change > 0:
         ref_list_mtm.append('Compared to the previous month, felony referrals increased by {}%,'.format(fel_refs_all_pct_change))
@@ -446,11 +445,13 @@ if uploaded_file is not None:
         ref_list_mtm.append('CINS referrals decrease by {}%.'.format(cins_refs_all_pct_change))
 
     st.write(' '.join(ref_list_mtm))
-    st.write(' ')
 
     ref_list_ytd = []
 
-    st.write('Compared to the same months in {},'.format(fy_previous))
+    if month_index_cur() == 0:
+        ref_list_ytd.append('Compared to the same month of the previous fiscal year')
+    else:
+        ref_list_ytd.append('Compared to the same months in {},'.format(fy_previous))
 
     if fel_t_22ytd_pct_chg > 0:
         ref_list_ytd.append(
@@ -475,11 +476,10 @@ if uploaded_file is not None:
         ref_list_ytd.append('a {}% decrease in felony weapons referrals.'.format(fel_weapons_22ytd_pct_chg))
 
     st.write(' '.join(ref_list_ytd))
-    st.write(' ')
-
-    st.write('Through the same {} months,'.format(month_index_cur() + 1))
 
     ref_m_list_ytd = []
+
+    ref_m_list_ytd.append('Through the same {} months,'.format(month_index_cur() + 1))
 
     if mis_t_22ytd_pct_chg > 0:
         ref_m_list_ytd.append(
@@ -501,9 +501,9 @@ if uploaded_file is not None:
             'while also receiving nearly {}% decrease in VOP referrals,'.format(mis_vop_22ytd_pct_chg))
 
     if status_22ytd_pct_chg > 0:
-        ref_m_list_ytd.append('{}% more status offense referrals,'.format(status_22ytd_pct_chg))
+        ref_m_list_ytd.append('{}% more status offense referrals,'.format(abs(status_22ytd_pct_chg)))
     else:
-        ref_m_list_ytd.append('{}% fewer status offense referrals,'.format(status_22ytd_pct_chg))
+        ref_m_list_ytd.append('{}% fewer status offense referrals,'.format(abs(status_22ytd_pct_chg)))
 
     if cins_22ytd_pct_chg > 0:
         ref_m_list_ytd.append('and a {}% more CINS other than status referrals in {}.'.format(cins_22ytd_pct_chg, fy_current))
@@ -516,11 +516,14 @@ if uploaded_file is not None:
 
     st.markdown("---")
     # court hearing
-    st.write('\n')
     st.title('***Court Hearings & Dispositions***')
-    st.write('\n')
 
     det_hear_list = []
+
+    if month_index_cur() == 0:
+        ref_list_ytd.append('Compared to the first month of {}'.format(fy_current))
+    else:
+        ref_list_ytd.append('Compared to the first {} months of {},'.format(month_index_cur() + 1, fy_previous))
 
     if t_court_hearings_22ytd_pct_chg > 0:
         det_hear_list.append('Compared to the first {} months of {}, the number of detention hearings held in {} increased by {}%, including'.format(
@@ -614,19 +617,12 @@ if uploaded_file is not None:
 
 
     st.markdown('---')
-    st.write('\n')
     st.title('***Sealings***')
-    st.write('\n')
-
-
 
     st.write('The Records Unit sealed {} records in {}, bringing the {} YTD total to {}.'.format(seals_ct, report_month_cur(), fy_current,
                                                                                       seals_fy22ytd))
 
-
-
     st.markdown("---")
-    st.write('\n')
     st.title('***Detention***')
 
     # Detention Admissions
@@ -865,25 +861,31 @@ if uploaded_file is not None:
 
 
 
-    det_adp_ytd_pct_change = math.trunc(round((((df7.loc['FY22 Total', ('Total', 'ADP')]) / (df7.loc['FY21 Total', ('Total', 'ADP')]) - 1) * 100), 2))
+    det_adp_ytd_pct_change = round_pct_change(df7.loc['FY22 Total', ('Total', 'ADP')], df7.loc['FY21 Total', ('Total', 'ADP')])
+
+    detlist4 = []
+
+    if month_index_cur() == 0:
+        detlist4.append('Detention ADP through the first month of {}'.format(fy_current))
+    else:
+        detlist4.append('Detention ADP through the first {} month of {}'.format(month_index_cur() + 1, fy_current))
+
 
     if det_admissions_ytd_pct_change > 0:
-        st.write('Detention ADP through the first {} months of {} increased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
-                                                                                   month_index_cur() + 1,
-                                                                                   fy_current,
+        detlist4.append('increased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
                                                                                    det_adp_ytd_pct_change,
                                                                                    round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
                                                                                    fy_previous,
                                                                                    round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
     else:
-        st.write('Detention ADP through the first {} months of {} decreased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
+        detlist4.append('decreased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
                                                                                    month_index_cur() + 1,
                                                                                    fy_current,
                                                                                    det_adp_ytd_pct_change,
                                                                                    round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
                                                                                    fy_previous,
                                                                                    round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
-
+    st.write(' '.join(detlist4))
 
     def paragraph_perc(df, col1, col2, dir):
         '''
@@ -912,10 +914,7 @@ if uploaded_file is not None:
 
     # Caseloads
     st.markdown("---")
-    st.write('\n')
     st.title('***Caseloads MTM***')
-    st.write('\n')
-
 
     caseload_dict = {}
     cl_name = []
@@ -957,10 +956,7 @@ if uploaded_file is not None:
     st.write(cls[cls['Caseload Perc. Change (MTM)'] < 0].sort_values(by='Caseload Perc. Change (MTM)').reset_index(drop=True).style.format({'Caseload Perc. Change (MTM)': '{:,.2%}'.format}))
 
     st.write('---')
-
-    st.write('\n')
     st.title('***Caseloads YTD***')
-    st.write('\n')
 
     caseload_dict2 = {}
     cl_name2 = []
@@ -1010,10 +1006,7 @@ if uploaded_file is not None:
     st.write(cls2[cls2['Caseload Perc. Change (YTD)'] < 0].sort_values(by='Caseload Perc. Change (YTD)').reset_index(drop=True).style.format({'Caseload Perc. Change (YTD)': '{:,.2%}'.format}))
 
     st.write('---')
-
-    st.write('\n')
     st.title('***Supervisions***')
-    st.write('\n')
 
     sup_list = []
 
@@ -1064,11 +1057,12 @@ if uploaded_file is not None:
 
     st.write(' '.join(sup_list))
 
-
     # Supervision YTD text
     sup_list2 = []
     if month_index_cur() == 11:
         sup_list2.append('When looking at the entire fiscal year,')
+    elif month_index_cur() == 0:
+        sup_list2.append('When looking at the first month fiscal year,')
     else:
         sup_list2.append('Through the first {} months of {}'.format(month_index_cur()+1, fy_current ))
 
