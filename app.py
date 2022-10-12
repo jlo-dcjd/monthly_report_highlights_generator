@@ -1225,7 +1225,7 @@ if uploaded_file is not None:
 
 
     st.subheader('Internal Placement ADP MTM - Increases')
-    st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
+    st.dataframe(int_pl[int_pl['Placement Perc. Change (MTM)'] > 0].reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
     st.subheader('Internal Placement ADP MTM - Decreases')
     st.write(int_pl[int_pl['Placement Perc. Change (MTM)'] < 0].sort_values(by='Placement Perc. Change (MTM)').reset_index(drop=True).style.format({'Placement Perc. Change (MTM)': '{:,.2%}'.format}))
     st.write('---')
@@ -1300,7 +1300,7 @@ if uploaded_file is not None:
 
     con_place_list = []
 
-    con_place_list.append('({}) youth were served at contract placement facilities in {}, including {} admissions during {}.'.format(df11.iloc[month_index_cur(), 0],
+    con_place_list.append('{} youth were served at contract placement facilities in {}, including {} admissions during {}.'.format(df11.iloc[month_index_cur(), 0],
                                                                                                                report_month_cur(),
                                                                                                                df11.iloc[month_index_cur(), 1],
                                                                                                                report_month_cur()
@@ -1409,88 +1409,152 @@ if uploaded_file is not None:
     st.write('\n')
     st.subheader('***Psychological Services Referrals YTD***')
 
+    st.write('***During the first {} months of {} YTD:***'.format(month_index_cur() + 1, fy_current))
+
+    psych_ytd_dict = {}
+    psych_names = []
+    psych_chg = []
+    psych_prev = []
+    psych_cur = []
+
+    # for i in range(0, df12.shape[1]):
+    #     try:
+    #         if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
+    #             st.write(
+    #                 '{}: {}% increase ({}: {} | {}: {})'.format(
+    #                     df12.columns[i],
+    #                     round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i]),
+    #                     fy_previous,
+    #                     round(df12.iloc[-1, i]),
+    #                     fy_current,
+    #                     round(df12.iloc[-2, i])
+    #                     ))
+    #         else:
+    #             st.write(
+    #                 '{}: {}% decrease ({}: {} | {}: {})'.format(
+    #                     df12.columns[i],
+    #                     round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i]),
+    #                     fy_previous,
+    #                     round(df12.iloc[-1, i]),
+    #                     fy_current,
+    #                     round(df12.iloc[-2, i])
+    #                     ))
+    #     except ZeroDivisionError:
+    #         pass
+
     for i in range(0, df12.shape[1]):
         try:
             if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
-                st.write(
-                    'There was a {}% increase for {} referrals during the first {} months of {} YTD, compared to the same months in {}. ({} vs. {})'.format(
-                        math.trunc(round((df12.iloc[-2, i] / df12.iloc[-1, i]) - 1, 2) * 100),
-                        df12.columns[i],
-                        month_index_cur() + 1,
-                        fy_current,
-                        fy_previous,
-                        math.trunc(round(df12.iloc[-2, i], 2)),
-                        math.trunc(round(df12.iloc[-1, i], 2))
-                        ))
+                psych_names.append(df12.columns[i])
+                psych_chg.append('{}% increase'.format(round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i])))
+                psych_prev.append(round(df12.iloc[-1, i]))
+                psych_cur.append(round(df12.iloc[-2, i]))
+
             else:
-                st.write(
-                    'There was a {}% decrease for {} referrals during the first {} months of {} YTD, compared to the same months in {}. ({} vs. {})'.format(
-                        math.trunc(round((df12.iloc[-2, i] / df12.iloc[-1, i]) - 1, 2) * 100),
-                        df12.columns[i],
-                        month_index_cur() + 1,
-                        fy_current,
-                        fy_previous,
-                        math.trunc(round(df12.iloc[-2, i], 2)),
-                        math.trunc(round(df12.iloc[-1, i], 2))
-                        ))
+                psych_names.append(df12.columns[i])
+                psych_chg.append('{}% decrease'.format(abs(round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i]))))
+                psych_prev.append(round(df12.iloc[-1, i]))
+                psych_cur.append(round(df12.iloc[-2, i]))
         except ZeroDivisionError:
             pass
+
+    psych_ytd_dict['Service     '] = psych_names
+    psych_ytd_dict['Percent Change'] = psych_chg
+    psych_ytd_dict['{}'.format(fy_previous)] = psych_prev
+    psych_ytd_dict['{}'.format(fy_current)] = psych_cur
+
+    psych_df = pd.DataFrame(psych_ytd_dict)
+    st.write(psych_df)
 
     st.write('---')
     st.subheader('***Behavioral Health Services Referrals MTM***')
 
+    bh_mtm_dict = {}
+    bh_mtm_name = []
+    bh_mtm_chg = []
+    bh_mtm_prev = []
+    bh_mtm_cur = []
+
     for i in range(0, df13.shape[1]):
         try:
-
-            if (df13.iloc[month_index_cur(), i] / df13.iloc[month_index_cur(), i]) - 1 > 0:
-                st.write(
-                    '{} Referrals made during {} were up {}% compared to {} ({} vs. {}).'.format(
-                        df13.columns[i],
-                        report_month_cur(),
-                        math.trunc(round((df13.iloc[month_index_cur(), i] / df13.iloc[month_index_prev(), i]) - 1, 2) * 100),
-                        report_month_prev(),
-                        math.trunc(round(df13.iloc[month_index_cur(), i], 2)),
-                        math.trunc(round(df13.iloc[month_index_prev(), i], 2))))
+            if (df13.iloc[month_index_cur(), i] / df13.iloc[month_index_prev(), i]) - 1 > 0:
+                bh_mtm_name.append(df13.columns[i])
+                bh_mtm_chg.append('{}% increase'.format(round_pct_change(df13.iloc[month_index_cur(), i], df13.iloc[month_index_prev(), i])))
+                bh_mtm_prev.append(round(df13.iloc[month_index_prev(), i]))
+                bh_mtm_cur.append(round(df13.iloc[month_index_cur(), i]))
             else:
-                st.write(
-                    '{} Referrals made during {} were down {}% compared to {} ({} vs. {}).'.format(
-                        df13.columns[i],
-                        report_month_cur(),
-                        math.trunc(round((df13.iloc[month_index_cur(), i] / df13.iloc[month_index_prev(), i]) - 1, 2) * 100),
-                        report_month_prev(),
-                        math.trunc(round(df13.iloc[month_index_cur(), i], 2)),
-                        math.trunc(round(df13.iloc[month_index_prev(), i], 2))))
+                bh_mtm_name.append(df13.columns[i])
+                bh_mtm_chg.append('{}% decrease'.format(abs(round_pct_change(df13.iloc[month_index_cur(), i], df13.iloc[month_index_prev(), i]))))
+                bh_mtm_prev.append(round(df13.iloc[month_index_prev(), i]))
+                bh_mtm_cur.append(round(df13.iloc[month_index_cur(), i]))
         except ZeroDivisionError:
             pass
+
+    bh_mtm_dict['Service'] = bh_mtm_name
+    bh_mtm_dict['Percent Change'] = bh_mtm_chg
+    bh_mtm_dict['{}'.format(report_month_prev())] = bh_mtm_prev
+    bh_mtm_dict['{}'.format(report_month_cur())] = bh_mtm_cur
+
+    st.dataframe(pd.DataFrame(bh_mtm_dict))
+
 
     st.write('\n')
     st.subheader('***Behavioral Health Services Referrals YTD***')
 
+    bh_ytd_dict = {}
+    bh_ytd_name = []
+    bh_ytd_chg = []
+    bh_ytd_prev = []
+    bh_ytd_cur = []
+
     for i in range(0, df13.shape[1]):
         try:
-
             if (df13.iloc[-2, i] / df13.iloc[-1, i]) - 1 > 0:
-                st.write(
-                    '{} Referrals made through {} {} YTD were up {}% compared to {} YTD ({} vs. {}).'.format(
-                        df13.columns[i],
-                        report_month_cur(),
-                        fy_current,
-                        math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
-                        fy_previous,
-                        math.trunc(round(df13.iloc[-2, i], 2)),
-                        math.trunc(round(df13.iloc[-1, i], 2))))
+                bh_ytd_name.append(df13.columns[i])
+                bh_ytd_chg.append('{}% increase'.format(round_pct_change(df13.iloc[-2, i], df13.iloc[-1, i])))
+                bh_ytd_prev.append(round(df13.iloc[-1, i]))
+                bh_ytd_cur.append(round(df13.iloc[-2, i]))
             else:
-                st.write(
-                    '{} Referrals made through {} {} YTD were down {}% compared to {} YTD ({} vs. {}).'.format(
-                        df13.columns[i],
-                        report_month_cur(),
-                        fy_current,
-                        math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
-                        fy_previous,
-                        math.trunc(round(df13.iloc[-2, i], 2)),
-                        math.trunc(round(df13.iloc[-1, i], 2))))
+                bh_ytd_name.append(df13.columns[i])
+                bh_ytd_chg.append('{}% decrease'.format(abs(round_pct_change(df13.iloc[-2, i], df13.iloc[-1, i]))))
+                bh_ytd_prev.append(round(df13.iloc[-1, i]))
+                bh_ytd_cur.append(round(df13.iloc[-2, i]))
         except ZeroDivisionError:
             pass
+
+    bh_ytd_dict['Service'] = bh_ytd_name
+    bh_ytd_dict['Percent Change'] = bh_ytd_chg
+    bh_ytd_dict['{}'.format(fy_previous)] = bh_ytd_prev
+    bh_ytd_dict['{}'.format(fy_current)] = bh_ytd_cur
+
+    st.dataframe(pd.DataFrame(bh_ytd_dict))
+
+
+    # for i in range(0, df13.shape[1]):
+    #     try:
+    #
+    #         if (df13.iloc[-2, i] / df13.iloc[-1, i]) - 1 > 0:
+    #             st.write(
+    #                 '{} Referrals made through {} {} YTD were up {}% compared to {} YTD ({} vs. {}).'.format(
+    #                     df13.columns[i],
+    #                     report_month_cur(),
+    #                     fy_current,
+    #                     math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
+    #                     fy_previous,
+    #                     math.trunc(round(df13.iloc[-2, i], 2)),
+    #                     math.trunc(round(df13.iloc[-1, i], 2))))
+    #         else:
+    #             st.write(
+    #                 '{} Referrals made through {} {} YTD were down {}% compared to {} YTD ({} vs. {}).'.format(
+    #                     df13.columns[i],
+    #                     report_month_cur(),
+    #                     fy_current,
+    #                     math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
+    #                     fy_previous,
+    #                     math.trunc(round(df13.iloc[-2, i], 2)),
+    #                     math.trunc(round(df13.iloc[-1, i], 2))))
+    #     except ZeroDivisionError:
+    #         pass
 
     st.write('\n')
     st.subheader('***Clinical Service Referral Outcomes YTD***')
