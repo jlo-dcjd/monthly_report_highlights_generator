@@ -1608,31 +1608,58 @@ if uploaded_file is not None:
     st.write('\n')
     st.write('Through {} fiscal YTD: '.format(report_month_cur()))
 
+    ed_ytd_dict = {}
+    ed_ytd_name = []
+    ed_ytd_chg = []
+    ed_ytd_prev = []
+    ed_ytd_cur = []
+
     for i in range(0, 13):
         try:
-
             if (df15.iloc[-2, i] / df15.iloc[-1, i]) - 1 > 0:
-                st.write(
-                    '{}: {}% increase ({}: {} | {}: {})'.format(
-                        df15.columns[i],
-                        round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i]),
-                        fy_previous,
-                        round(df15.iloc[-1, i]),
-                        fy_current,
-                        round(df15.iloc[-2, i]),
-                    ))
+                ed_ytd_name.append(df15.columns[i])
+                ed_ytd_chg.append('{}% increase'.format(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])))
+                ed_ytd_prev.append(round(df15.iloc[-1, i]))
+                ed_ytd_cur.append(round(df15.iloc[-2, i]))
             else:
-                st.write(
-                    '{}: {}% decrease ({}: {} | {}: {})'.format(
-                        df15.columns[i],
-                        abs(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])),
-                        fy_previous,
-                        round(df15.iloc[-1, i]),
-                        fy_current,
-                        round(df15.iloc[-2, i]),
-                    ))
+                ed_ytd_name.append(df15.columns[i])
+                ed_ytd_chg.append('{}% decrease'.format(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])))
+                ed_ytd_prev.append(round(df15.iloc[-1, i]))
+                ed_ytd_cur.append(round(df15.iloc[-2, i]))
         except ZeroDivisionError:
             pass
+
+    ed_ytd_dict['Dallas County JJAEP'] = ed_ytd_name
+    ed_ytd_dict['Percent Change'] = ed_ytd_chg
+    ed_ytd_dict['{}'.format(fy_previous)] = ed_ytd_prev
+    ed_ytd_dict['{}'.format(fy_current)] = ed_ytd_cur
+
+    st.dataframe(pd.DataFrame(ed_ytd_dict))
+
+    # for i in range(0, 13):
+    #     try:
+    #         if (df15.iloc[-2, i] / df15.iloc[-1, i]) - 1 > 0:
+    #             st.write(
+    #                 '{}: {}% increase ({}: {} | {}: {})'.format(
+    #                     df15.columns[i],
+    #                     round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i]),
+    #                     fy_previous,
+    #                     round(df15.iloc[-1, i]),
+    #                     fy_current,
+    #                     round(df15.iloc[-2, i]),
+    #                 ))
+    #         else:
+    #             st.write(
+    #                 '{}: {}% decrease ({}: {} | {}: {})'.format(
+    #                     df15.columns[i],
+    #                     abs(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])),
+    #                     fy_previous,
+    #                     round(df15.iloc[-1, i]),
+    #                     fy_current,
+    #                     round(df15.iloc[-2, i]),
+    #                 ))
+    #     except ZeroDivisionError:
+    #         pass
 
 
 
