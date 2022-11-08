@@ -50,6 +50,19 @@ fy_current = st.text_input("Type current fiscal year:", 'FY2023')
 fy_previous = st.text_input("Type previous fiscal year:", 'FY2022')
 
 
+def fy_cur_short_abv():
+    if report_month_cur() == 11:
+        return fy_current[:2] + fy_current[-2:]
+    else:
+        return fy_current[:2] + fy_current[-2:] + ' YTD'
+
+
+def fy_prev_short_abv():
+    if report_month_cur() == 11:
+        return fy_previous[:2] + fy_previous[-2:]
+    else:
+        return fy_previous[:2] + fy_previous[-2:] + ' YTD'
+
 # current = fy22[datetime.now().month + 1]
 # previous = fy22[datetime.now().month ]
 #
@@ -103,7 +116,11 @@ if uploaded_file is not None:
     header = df3.iloc[:2]
     df3 = df3.iloc[2:, :np.where(header.values[0] == 'Total Held Hearings')[0][0] + 1]
 
-    hearing_col = header.values[1][:np.where(header.values[1] == 'Total Held Certification Hearings')[0][0] + 1]
+    try:
+        hearing_col = header.values[1][:np.where(header.values[1] == 'Total Held Certification Hearings')[0][0] + 1]
+    except IndexError:
+        hearing_col = header.values[1][:np.where(header.values[1] == 'Total Held Review Hearings')[0][0] + 1]
+
     df3.columns = np.append(hearing_col, np.where(header.values[0] == 'Total Held Hearings')[0][0] + 1)
 
     # replace all zeros w/ null
@@ -250,9 +267,9 @@ if uploaded_file is not None:
     df13 = df13.iloc[2:, np.where(df13.iloc[1] == 'Behavioral Health Services Referrals')[0][0]+1: np.where(df13.iloc[1] == 'Total')[0][1]+1]
     df13 = df13.set_index('Referred For')
     try:
-        df13 = df13.loc[:'FY21 YTD Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
     except KeyError:
-        df13 = df13.loc[:'FY21 Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
 
     # Clinical Service Referral Outcomes
     df14 = pd.read_excel(uploaded_file, sheet_name=10).T
@@ -262,9 +279,9 @@ if uploaded_file is not None:
     df14 = df14.iloc[2:, np.where(df14.iloc[1] == 'Clinical Service Referral Outcomes')[0][0]+1: np.where(df14.iloc[1] == 'Behavioral Health Services Referrals Completed')[0][0]+1]
     df14 = df14.set_index('Referral Type')
     try:
-        df13 = df13.loc[:'FY21 YTD Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
     except KeyError:
-        df13 = df13.loc[:'FY21 Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
 
     # education
     df15 = pd.read_excel(uploaded_file, sheet_name=11, skiprows=4, usecols=list(range(2, 18))).T
@@ -345,11 +362,6 @@ if uploaded_file is not None:
     t_court_hearings_prev= df3.iloc[-1, df3.columns.get_loc("Total Held Detention Hearings")]
     t_court_hearings_22ytd_pct_chg = round_pct_change(t_court_hearings_ct, t_court_hearings_prev)
 
-
-
-    court_hear_reset_fy22 = math.trunc(round(df4.iloc[-2, -1], 2) * 100)
-    court_hear_reset_fy21 = math.trunc(round(df4.iloc[-1, -1], 2) * 100)
-
     # Deferred Prosecution MTM
     def_pros_ct = df5.iloc[month_index_cur(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][0]]
     def_pros_ct2 = df5.iloc[month_index_cur(), np.where(df5.columns.get_loc('Deferred Prosecution') == True)[0][1]]
@@ -383,8 +395,6 @@ if uploaded_file is not None:
     def_pros_pct_chg_ytd22 = math.trunc(round(((def_pros_ytd22 + def_pros_ytd22_2 + def_pros_ytd22_3) / \
                                                (def_pros_ytd21 + def_pros_ytd21_2 + def_pros_ytd21_3) - 1), 2) * 100)
 
-    cert_adlt_fy22ytd = df5.iloc[-2, df5.columns.get_loc("Certified as an Adult")]
-    cert_adlt_fy21ytd = df5.iloc[-1, df5.columns.get_loc("Certified as an Adult")]
 
     # sealings
     seals_ct = df6.iloc[month_index_cur(), 0]
@@ -427,29 +437,29 @@ if uploaded_file is not None:
     if fel_refs_all_pct_change > 0:
         ref_list_mtm.append('Compared to the previous month, felony referrals increased by {}%,'.format(fel_refs_all_pct_change))
     else:
-        ref_list_mtm.append('Compared to the previous month, felony referrals decrease by {}%,'.format(fel_refs_all_pct_change))
+        ref_list_mtm.append('Compared to the previous month, felony referrals decreased by {}%,'.format(fel_refs_all_pct_change))
 
     if mis_refs_all_pct_change > 0:
         ref_list_mtm.append('misdemeanor referrals increased by {}%,'.format(mis_refs_all_pct_change))
     else:
-        ref_list_mtm.append('misdemeanor referrals decrease by {}%,'.format(mis_refs_all_pct_change))
+        ref_list_mtm.append('misdemeanor referrals decreased by {}%,'.format(mis_refs_all_pct_change))
 
     if vop_refs_all_pct_change > 0:
         ref_list_mtm.append('VOPs referrals increased by {}%,'.format(vop_refs_all_pct_change))
     else:
-        ref_list_mtm.append('VOPs referrals decrease by {}%,'.format(vop_refs_all_pct_change))
+        ref_list_mtm.append('VOPs referrals decreased by {}%,'.format(vop_refs_all_pct_change))
 
     if cins_refs_all_pct_change > 0:
         ref_list_mtm.append('CINS referrals increased by {}%.'.format(cins_refs_all_pct_change))
     else:
-        ref_list_mtm.append('CINS referrals decrease by {}%.'.format(cins_refs_all_pct_change))
+        ref_list_mtm.append('CINS referrals decreased by {}%.'.format(abs(cins_refs_all_pct_change)))
 
     st.write(' '.join(ref_list_mtm))
 
     ref_list_ytd = []
 
     if month_index_cur() == 0:
-        ref_list_ytd.append('Compared to the same month of the previous fiscal year')
+        ref_list_ytd.append('Compared to the same month of the previous fiscal year,')
     else:
         ref_list_ytd.append('Compared to the same months in {},'.format(fy_previous))
 
@@ -541,16 +551,11 @@ if uploaded_file is not None:
     for i in range(6):
         try:
             if (df3.iloc[-2, i] / df3.iloc[-1, i]) - 1 > 0:
-                det_hear_list.append('a {}% increase in {} hearings,'.format(
-                    math.trunc(round((df3.iloc[-2, i] / df3.iloc[-1, i]) - 1, 2) * 100),
-                    df3.iloc[:, :6].columns[i]))
+                det_hear_list.append(f'a {round_pct_change(df3.iloc[-2, i], df3.iloc[-1, i])}% increase in {df3.iloc[:, :6].columns[i]} hearings,')
             else:
-                det_hear_list.append('a {}% decrease in {} hearings,'.format(
-                    math.trunc(round((df3.iloc[-2, i] / df3.iloc[-1, i]) - 1, 2) * 100),
-                    df3.iloc[:, :6].columns[i]))
+                det_hear_list.append(f'a {abs(round_pct_change(df3.iloc[-2, i], df3.iloc[-1, i]))}% decrease in {df3.iloc[:, :6].columns[i]} hearings,')
         except:
             pass
-
 
     non_det_hearings = (((df3.iloc[-2, -1] - df3.iloc[-2, df3.columns.get_loc('Total Held Detention Hearings')]) / (df3.iloc[-1, -1] - df3.iloc[-1, df3.columns.get_loc('Total Held Detention Hearings')]) - 1).round(2)*100).astype(int)
 
@@ -561,20 +566,19 @@ if uploaded_file is not None:
         det_hear_list.append('and non-detention hearings decreased by {}%.'.format(
             non_det_hearings))
 
-
     st.write(' '.join(det_hear_list))
 
 
     # resets
     st.write('\n')
-    if court_hear_reset_fy22 > court_hear_reset_fy21:
+    if round((df4.iloc[-2, 5]) *100) > round((df4.iloc[-1, 5]) *100):
         st.write(
             'Court hearing resets are higher than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
-                court_hear_reset_fy22, fy_current, court_hear_reset_fy21, month_index_cur() + 1, fy_previous))
+                round((df4.iloc[-2, 5]) * 100), fy_current, round((df4.iloc[-1, 5]) *100), month_index_cur() + 1, fy_previous))
     else:
         st.write(
             'Court hearing resets are lower than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
-                court_hear_reset_fy22, fy_current, court_hear_reset_fy21, month_index_cur() + 1, fy_previous))
+                round((df4.iloc[-2, 5]) * 100), fy_current, round((df4.iloc[-1, 5]) *100), month_index_cur() + 1, fy_previous))
 
 
     # Dispositions
@@ -607,10 +611,17 @@ if uploaded_file is not None:
         disp_list.append('and Deferred Prosecution dispositions decreased by {}% {} YTD compared to {} YTD.'.format(
             def_pros_pct_chg_ytd22, fy_current, fy_previous))
 
+    try:
+        cert_adlt_cur_ytd = df5.iloc[-2, df5.columns.get_loc("Certified as an Adult")]
+        cert_adlt_prev_ytd = df5.iloc[-1, df5.columns.get_loc("Certified as an Adult")]
+    except KeyError:
+        cert_adlt_cur_ytd = 0
+        cert_adlt_prev_ytd = 0
+
+
     if def_pros_pct_chg_ytd22 > 0:
         disp_list.append(
-            'Finally, {} juveniles were certified as an adult through {} YTD compared to {} certifications in {} YTD.'.format(
-                cert_adlt_fy22ytd, fy_current, cert_adlt_fy21ytd, fy_previous))
+            f'Finally, {cert_adlt_cur_ytd} juveniles were certified as an adult through {fy_current} YTD compared to {cert_adlt_prev_ytd} certifications in {fy_previous} YTD.')
 
     st.write(' '.join(disp_list))
 
@@ -641,8 +652,7 @@ if uploaded_file is not None:
             abs(round((df7.iloc[month_index_cur(), 13] / df7.iloc[month_index_prev(), 13] - 1) * 100)),
             report_month_prev()))
 
-
-    det_admissions_ytd_pct_change = round((((df7.loc['FY22 Total', ('Total', 'Admissions')]) / (df7.loc['FY21 Total', ('Total', 'Admissions')]) - 1) * 100))
+    det_admissions_ytd_pct_change = round((((df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]) / (df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'Admissions')]) - 1) * 100))
 
     if det_admissions_ytd_pct_change > 0:
         det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% higher than the total admissions during the same months of the previous fiscal year.'.format(
@@ -652,10 +662,10 @@ if uploaded_file is not None:
             det_admissions_ytd_pct_change))
     else:
         det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% lower than the total admissions during the same months of the previous fiscal year.'.format(
-            int(df7.loc['FY22 Total', ('Total', 'Admissions')]),
+            int(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]),
             month_index_cur()+1,
             fy_current,
-            det_admissions_ytd_pct_change))
+            abs(det_admissions_ytd_pct_change)))
 
     st.write(' '.join(det_admit_list))
 
@@ -665,11 +675,13 @@ if uploaded_file is not None:
     if round((df7.iloc[month_index_cur(), 14] / df7.iloc[ month_index_prev(), 14] - 1)*100) > 0:
         detlist2.append('The total number of exits from detention in {} increased by {}% compared to the previous month.'.format(
             report_month_cur(),
-            round((df7.iloc[month_index_cur(), 14] / df7.iloc[month_index_prev(), 14] - 1) * 100)))
+            round_pct_change(df7.iloc[month_index_cur(), 14], df7.iloc[month_index_prev(), 14]),
+        ))
     else:
         detlist2.append('The total number of exits from detention in {} decreased by {}% compared to the previous month.'.format(
             report_month_cur(),
-            round((df7.iloc[month_index_cur(), 14] / df7.iloc[month_index_prev(), 14] - 1) * 100)))
+            abs(round_pct_change(df7.iloc[month_index_cur(), 14], df7.iloc[month_index_prev(), 14])),
+        ))
 
 
     if round((df7.iloc[month_index_cur(), 16] / df7.iloc[ month_index_prev(), 16] - 1)*100) > 0:
@@ -723,14 +735,14 @@ if uploaded_file is not None:
     detlist3 = []
 
     if round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100) > 0:
-        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% increase from {}'.format(
+        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% increase from {}.'.format(
             report_month_cur(),
             round(df7.iloc[month_index_cur(), 15], 1),
             round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100),
             report_month_prev()
         ))
     else:
-        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% decrease from {}'.format(
+        detlist3.append('The Average Daily Population (ADP) in {} was {}, a {}% decrease from {}.'.format(
             report_month_cur(),
             round(df7.iloc[month_index_cur(), 15], 1),
             abs(round((df7.iloc[month_index_cur(), 15] / df7.iloc[month_index_prev(), 15] - 1) * 100)),
@@ -861,7 +873,7 @@ if uploaded_file is not None:
 
 
 
-    det_adp_ytd_pct_change = round_pct_change(df7.loc['FY22 Total', ('Total', 'ADP')], df7.loc['FY21 Total', ('Total', 'ADP')])
+    det_adp_ytd_pct_change = round_pct_change(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')], df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')])
 
     detlist4 = []
 
@@ -874,17 +886,17 @@ if uploaded_file is not None:
     if det_admissions_ytd_pct_change > 0:
         detlist4.append('increased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
                                                                                    det_adp_ytd_pct_change,
-                                                                                   round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
+                                                                                   round(df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')], 1),
                                                                                    fy_previous,
-                                                                                   round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
+                                                                                   round(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')], 1)
+                                                                                    ))
     else:
         detlist4.append('decreased by {}% compared to the previous fiscal year-to-date, from {} in {} to {}.'.format(
-                                                                                   month_index_cur() + 1,
-                                                                                   fy_current,
                                                                                    det_adp_ytd_pct_change,
-                                                                                   round(df7.loc['FY21 Total', ('Total', 'ADP')], 1),
+                                                                                   round(df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')], 1),
                                                                                    fy_previous,
-                                                                                   round(df7.loc['FY22 Total', ('Total', 'ADP')], 1)))
+                                                                                   round(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')], 1)
+                                                                                    ))
     st.write(' '.join(detlist4))
 
     def paragraph_perc(df, col1, col2, dir):
@@ -1301,11 +1313,12 @@ if uploaded_file is not None:
                                                                                                                ))
 
     con_place_list.append('Specifically,')
-    new_youth_plc = df11[df11.columns[df11.columns.str.contains('Youth Served')]].iloc[month_index_prev():month_index_cur() + 1, 1:].diff().dropna().T
-    new_youth_plc = new_youth_plc[new_youth_plc.SEP > 0]
+    ext_prg_prev = df11[df11.columns[df11.columns.str.contains('Youth Served')]].iloc[month_index_prev()]
+    ext_prg_cur = df11[df11.columns[df11.columns.str.contains('Youth Served')]].iloc[month_index_cur()]
+    new_youth_plc = (ext_prg_cur - ext_prg_prev)[(ext_prg_cur - ext_prg_prev) > 0]
 
     for index, value in zip(new_youth_plc.index, new_youth_plc.values.flatten()):
-        con_place_list.append('{} youth was admitted to {}, '.format(value, index[:-14]))
+        con_place_list.append('{} youth were admitted to {}, '.format(value, index[:-14]))
 
     con_place_list.append('There were {} exits from contract placement facilities during {}.'.format(df11.iloc[month_index_cur(), 2], report_month_cur()))
 
@@ -1374,7 +1387,7 @@ if uploaded_file is not None:
     else:
         psych_list.append(
             'are down {}% compared to the same months in {}.'.format(
-                round_pct_change(df12.iloc[-2, -1], df12.iloc[-1, -1]),
+                abs(round_pct_change(df12.iloc[-2, -1], df12.iloc[-1, -1])),
                 fy_previous))
 
     st.write(' '.join(psych_list))
@@ -1582,20 +1595,30 @@ if uploaded_file is not None:
     st.markdown("---")
     st.title('***Education***')
 
-    st.write('The Dallas County JJAEP had {} admissions in {}.'.format(int(df15.iloc[month_index_cur(), 4]), report_month_cur()))
+    ed_list = []
 
-    st.write('Of the youth served, {}% were Mandatory admissions, {}% were Discretionary, and {}% was Other.'.format(
+    ed_list.append('The Dallas County JJAEP had {} admissions in {}.'.format(int(df15.iloc[month_index_cur(), 4]), report_month_cur()))
+    ed_list.append(f'During the first {month_index_cur()+1} months of the previous fiscal year, there were {int(df15.Admissions[-1])} new JJAEP admissions.')
+    st.write(' '.join(ed_list))
+
+    ed_list2 = []
+
+    ed_list2.append(f'Overall, Dallas County JJAEP served {int(df15.iloc[month_index_cur(), 0])} youth in {report_month_cur()}.')
+
+    ed_list2.append('Of the youth served, {}% were Mandatory admissions, {}% were Discretionary, and {}% was Other.'.format(
         round((df15.iloc[month_index_cur(), 1] / df15.iloc[month_index_cur(), 0]) * 100),
         round((df15.iloc[month_index_cur(), 2] / df15.iloc[month_index_cur(), 0]) * 100),
         round((df15.iloc[month_index_cur(), 3] / df15.iloc[month_index_cur(), 0]) * 100)))
 
-    st.write('There were {} total exits from JJAEP in {}, {} of whom discharged successfully, {} unsuccessfully, and {} other.'.format(
+    ed_list2.append('There were {} total exits from JJAEP in {}, {} of whom discharged successfully, {} unsuccessfully, and {} other.'.format(
             int(df15.iloc[month_index_cur(), 5]),
             report_month_cur(),
             int(df15.iloc[month_index_cur(), 6]),
             int(df15.iloc[month_index_cur(), 7]),
             int(df15.iloc[month_index_cur(), 8])
             ))
+
+    st.write(' '.join(ed_list2))
 
     st.write('***[\* INSERT UNSUCCESSFUL EXITS REASONS HERE \*]***')
 
