@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 from datetime import datetime
 import math
-
+import inflect
 
 # fy22 = [('OCT 2021'), ('NOV 2021'), ('DEC 2021'), ('JAN 2022'), ('FEB 2022'), ('MAR 2022'), ('APR 2022'), ('MAY 2022'),
 #        ('JUN 2022'), ('JUL 2022'), ('AUG 2022'), ('September 2022')]
@@ -430,24 +430,24 @@ if uploaded_file is not None:
     else:
         ref_list_mtm.append(
             'The Dallas County Juvenile Department (DCJD) received {} formalized referrals in {}, a {}% decrease from the {} in {}.'.format(
-                t_for_refs_ct, report_month_cur(), t_for_refs_pct_chg, t_for_refs_prev, report_month_prev()))
+                t_for_refs_ct, report_month_cur(), abs(t_for_refs_pct_chg), t_for_refs_prev, report_month_prev()))
 
 
 
     if fel_refs_all_pct_change > 0:
         ref_list_mtm.append('Compared to the previous month, felony referrals increased by {}%,'.format(fel_refs_all_pct_change))
     else:
-        ref_list_mtm.append('Compared to the previous month, felony referrals decreased by {}%,'.format(fel_refs_all_pct_change))
+        ref_list_mtm.append('Compared to the previous month, felony referrals decreased by {}%,'.format(abs(fel_refs_all_pct_change)))
 
     if mis_refs_all_pct_change > 0:
         ref_list_mtm.append('misdemeanor referrals increased by {}%,'.format(mis_refs_all_pct_change))
     else:
-        ref_list_mtm.append('misdemeanor referrals decreased by {}%,'.format(mis_refs_all_pct_change))
+        ref_list_mtm.append('misdemeanor referrals decreased by {}%,'.format(abs(mis_refs_all_pct_change)))
 
     if vop_refs_all_pct_change > 0:
         ref_list_mtm.append('VOPs referrals increased by {}%,'.format(vop_refs_all_pct_change))
     else:
-        ref_list_mtm.append('VOPs referrals decreased by {}%,'.format(vop_refs_all_pct_change))
+        ref_list_mtm.append('VOPs referrals decreased by {}%,'.format(abs(vop_refs_all_pct_change)))
 
     if cins_refs_all_pct_change > 0:
         ref_list_mtm.append('CINS referrals increased by {}%.'.format(cins_refs_all_pct_change))
@@ -468,22 +468,22 @@ if uploaded_file is not None:
             'DCJD received {}% more felony referrals in {} year-to-date,'.format(fel_t_22ytd_pct_chg, fy_current))
     else:
         ref_list_ytd.append(
-            'DCJD received {}% less felony referrals in {} year-to-date,'.format(fel_t_22ytd_pct_chg, fy_current))
+            'DCJD received {}% less felony referrals in {} year-to-date,'.format(abs(fel_t_22ytd_pct_chg), fy_current))
 
     if fel_violent_22ytd_pct_chg > 0:
         ref_list_ytd.append('including a {}% increase in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
     else:
-        ref_list_ytd.append('including a {}% decrease in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
+        ref_list_ytd.append('including a {}% decrease in violent felony referrals,'.format(abs(fel_violent_22ytd_pct_chg)))
 
     if fel_drugs_22ytd_pct_chg > 0:
         ref_list_ytd.append('a {}% increase in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
     else:
-        ref_list_ytd.append('a {}% decrease in felony drug referrals'.format(fel_drugs_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% decrease in felony drug referrals'.format(abs(fel_drugs_22ytd_pct_chg)))
 
     if fel_weapons_22ytd_pct_chg > 0:
         ref_list_ytd.append('a {}% increase in felony weapons referrals.'.format(fel_weapons_22ytd_pct_chg))
     else:
-        ref_list_ytd.append('a {}% decrease in felony weapons referrals.'.format(fel_weapons_22ytd_pct_chg))
+        ref_list_ytd.append('a {}% decrease in felony weapons referrals.'.format(abs(fel_weapons_22ytd_pct_chg)))
 
     st.write(' '.join(ref_list_ytd))
 
@@ -1306,11 +1306,12 @@ if uploaded_file is not None:
 
     con_place_list = []
 
-    con_place_list.append('{} youth were served at contract placement facilities in {}, including {} admissions during {}.'.format(df11.iloc[month_index_cur(), 0],
-                                                                                                               report_month_cur(),
-                                                                                                               df11.iloc[month_index_cur(), 1],
-                                                                                                               report_month_cur()
-                                                                                                               ))
+    p = inflect.engine()
+
+    con_place_list.append(f'{(p.number_to_words(df11.iloc[month_index_cur(), 0])).capitalize()} \
+                        ({df11.iloc[month_index_cur(), 0]}) youth were served at contract placement facilities in {report_month_cur()}, \
+                        including {(p.number_to_words(df11.iloc[month_index_cur(), 1]))} ({df11.iloc[month_index_cur(), 1]}) \
+                        admissions during {report_month_cur()}.')
 
     con_place_list.append('Specifically,')
     ext_prg_prev = df11[df11.columns[df11.columns.str.contains('Youth Served')]].iloc[month_index_prev()]
@@ -1318,9 +1319,10 @@ if uploaded_file is not None:
     new_youth_plc = (ext_prg_cur - ext_prg_prev)[(ext_prg_cur - ext_prg_prev) > 0]
 
     for index, value in zip(new_youth_plc.index, new_youth_plc.values.flatten()):
-        con_place_list.append('{} youth were admitted to {}, '.format(value, index[:-14]))
+        con_place_list.append(f'{p.number_to_words(value)} ({value}) youth were admitted to {index[:-14]}, ')
 
-    con_place_list.append('There were {} exits from contract placement facilities during {}.'.format(df11.iloc[month_index_cur(), 2], report_month_cur()))
+    con_place_list.append(f'There were {p.number_to_words(df11.iloc[month_index_cur(), 2])} ({df11.iloc[month_index_cur(), 2]}) \
+                            exits from contract placement facilities during {report_month_cur()}.')
 
     st.write(' '.join(con_place_list))
 
@@ -1357,7 +1359,8 @@ if uploaded_file is not None:
 
     if (df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1 > 0:
         psych_list.append(
-            '{} Psychological Services Referrals were made in {}, a {}% increase compared to  {} ({} vs. {}).'.format(
+            '{} ({}) Psychological Services Referrals were made in {}, a {}% increase compared to  {} ({} vs. {}).'.format(
+                p.number_to_words(df12.iloc[month_index_cur(), -1]).capitalize(),
                 df12.iloc[month_index_cur(), -1],
                 report_month_cur(),
                 math.trunc(round((df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1, 2) * 100),
@@ -1377,7 +1380,7 @@ if uploaded_file is not None:
     if month_index_cur() == 11:
         psych_list.append('in {}'.format(fy_current))
     else:
-        psych_list.append('through the first {} months of {}'.format(month_index_cur()+1, fy_current))
+        psych_list.append('through the first {} months of {}'.format(p.number_to_words(month_index_cur()+1), fy_current))
 
     if (df12.iloc[-2, -1] / df12.iloc[-1, -1]) - 1 > 0:
         psych_list.append(
@@ -1567,25 +1570,25 @@ if uploaded_file is not None:
     st.subheader('***Clinical Service Referral Outcomes YTD***')
     st.write(
         'Through the first {} months of {}, {}% of all Psychological Services Referrals had a completed outcome,'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_current,
             math.trunc(round(df14.iloc[-2, 0], 2) * 100),
             ))
     st.write(
         'Through the first {} months of {}, {}% of all Psychological Services Referrals had a completed outcome,'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_previous,
             math.trunc(round(df14.iloc[-1, 0], 2) * 100),
             ))
     st.write(
         'Through the first {} months of {}, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_current,
             math.trunc(round(df14.iloc[-2, 1], 2) * 100),
             ))
     st.write(
         'Through the first {} months of {}, {}% of all Behavioral Health Services Referrals had a completed outcome,'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_previous,
             math.trunc(round(df14.iloc[-1, 1], 2) * 100),
             ))
@@ -1597,8 +1600,8 @@ if uploaded_file is not None:
 
     ed_list = []
 
-    ed_list.append('The Dallas County JJAEP had {} admissions in {}.'.format(int(df15.iloc[month_index_cur(), 4]), report_month_cur()))
-    ed_list.append(f'During the first {month_index_cur()+1} months of the previous fiscal year, there were {int(df15.Admissions[-1])} new JJAEP admissions.')
+    ed_list.append(f'The Dallas County JJAEP had {p.number_to_words(int(df15.iloc[month_index_cur(), 4]))} admissions in {report_month_cur()}.')
+    ed_list.append(f'During the first {p.number_to_words(month_index_cur()+1)} months of the previous fiscal year, there were {p.number_to_words(int(df15.Admissions[-1]))} new JJAEP admissions.')
     st.write(' '.join(ed_list))
 
     ed_list2 = []
