@@ -49,6 +49,7 @@ st.title("Monthly Report Generator")
 fy_current = st.text_input("Type current fiscal year:", 'FY2023')
 fy_previous = st.text_input("Type previous fiscal year:", 'FY2022')
 
+p = inflect.engine()
 
 def fy_cur_short_abv():
     if report_month_cur() == 11:
@@ -468,7 +469,7 @@ if uploaded_file is not None:
             'DCJD received {}% more felony referrals in {} year-to-date,'.format(fel_t_22ytd_pct_chg, fy_current))
     else:
         ref_list_ytd.append(
-            'DCJD received {}% less felony referrals in {} year-to-date,'.format(abs(fel_t_22ytd_pct_chg), fy_current))
+            'DCJD received {}% fewer felony referrals in {} year-to-date,'.format(abs(fel_t_22ytd_pct_chg), fy_current))
 
     if fel_violent_22ytd_pct_chg > 0:
         ref_list_ytd.append('including a {}% increase in violent felony referrals,'.format(fel_violent_22ytd_pct_chg))
@@ -489,7 +490,7 @@ if uploaded_file is not None:
 
     ref_m_list_ytd = []
 
-    ref_m_list_ytd.append('Through the same {} months,'.format(month_index_cur() + 1))
+    ref_m_list_ytd.append(f'Through the same {p.number_to_words(month_index_cur() + 1)} months,')
 
     if mis_t_22ytd_pct_chg > 0:
         ref_m_list_ytd.append(
@@ -533,17 +534,17 @@ if uploaded_file is not None:
     if month_index_cur() == 0:
         ref_list_ytd.append('Compared to the first month of {}'.format(fy_current))
     else:
-        ref_list_ytd.append('Compared to the first {} months of {},'.format(month_index_cur() + 1, fy_previous))
+        ref_list_ytd.append(f'Compared to the first {p.number_to_words(month_index_cur() + 1)} months of {fy_previous},')
 
     if t_court_hearings_22ytd_pct_chg > 0:
         det_hear_list.append('Compared to the first {} months of {}, the number of detention hearings held in {} increased by {}%, including'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_previous,
             fy_current,
             t_court_hearings_22ytd_pct_chg))
     else:
         det_hear_list.append('Compared to the first {} months of {}, the number of detention hearings held in {} decreased by {}%, including'.format(
-            month_index_cur() + 1,
+            p.number_to_words(month_index_cur() + 1),
             fy_previous,
             fy_current,
             t_court_hearings_22ytd_pct_chg))
@@ -593,10 +594,10 @@ if uploaded_file is not None:
             abs(def_pros_pct_chg_mtm), report_month_cur()))
 
     if adj_prob_pct_chg_mtm > 0:
-        disp_list.append('adjudicated to Probation had a month-to-month increase of {}%.'.format(
+        disp_list.append('and adjudicated to Probation had a month-to-month increase of {}%.'.format(
             adj_prob_pct_chg_mtm, report_month_cur()))
     else:
-        disp_list.append('adjudicated to Probation had a month-to-month decrease of {}%.'.format(
+        disp_list.append('and adjudicated to Probation had a month-to-month decrease of {}%.'.format(
             abs(adj_prob_pct_chg_mtm), report_month_cur()))
 
     if adj_prob_fy22_ytd_pct_chg > 0:
@@ -878,9 +879,9 @@ if uploaded_file is not None:
     detlist4 = []
 
     if month_index_cur() == 0:
-        detlist4.append('Detention ADP through the first month of {}'.format(fy_current))
+        detlist4.append(f'Detention ADP through the first month of {fy_current}')
     else:
-        detlist4.append('Detention ADP through the first {} month of {}'.format(month_index_cur() + 1, fy_current))
+        detlist4.append(f'Detention ADP through the first {p.number_to_words(month_index_cur() + 1)} months of {fy_current}')
 
 
     if det_admissions_ytd_pct_change > 0:
@@ -1306,8 +1307,6 @@ if uploaded_file is not None:
 
     con_place_list = []
 
-    p = inflect.engine()
-
     con_place_list.append(f'{(p.number_to_words(df11.iloc[month_index_cur(), 0])).capitalize()} \
                         ({df11.iloc[month_index_cur(), 0]}) youth were served at contract placement facilities in {report_month_cur()}, \
                         including {(p.number_to_words(df11.iloc[month_index_cur(), 1]))} ({df11.iloc[month_index_cur(), 1]}) \
@@ -1608,16 +1607,20 @@ if uploaded_file is not None:
 
     ed_list2.append(f'Overall, Dallas County JJAEP served {int(df15.iloc[month_index_cur(), 0])} youth in {report_month_cur()}.')
 
-    ed_list2.append('Of the youth served, {}% were Mandatory admissions, {}% were Discretionary, and {}% was Other.'.format(
+    ed_list2.append('Of the youth served, {}% were Mandatory admissions, {}% were Discretionary, and {}% were Other.'.format(
         round((df15.iloc[month_index_cur(), 1] / df15.iloc[month_index_cur(), 0]) * 100),
         round((df15.iloc[month_index_cur(), 2] / df15.iloc[month_index_cur(), 0]) * 100),
         round((df15.iloc[month_index_cur(), 3] / df15.iloc[month_index_cur(), 0]) * 100)))
 
-    ed_list2.append('There were {} total exits from JJAEP in {}, {} of whom discharged successfully, {} unsuccessfully, and {} other.'.format(
+    ed_list2.append('There were {} ({}) total exits from JJAEP in {}, {} ({}) of whom were discharged successfully, {} ({}) unsuccessfully, and {} ({}) other.'.format(
+            p.number_to_words(int(df15.iloc[month_index_cur(), 5])),
             int(df15.iloc[month_index_cur(), 5]),
             report_month_cur(),
+            p.number_to_words(int(df15.iloc[month_index_cur(), 6])),
             int(df15.iloc[month_index_cur(), 6]),
+            p.number_to_words(int(df15.iloc[month_index_cur(), 7])),
             int(df15.iloc[month_index_cur(), 7]),
+            p.number_to_words(int(df15.iloc[month_index_cur(), 8])),
             int(df15.iloc[month_index_cur(), 8])
             ))
 
