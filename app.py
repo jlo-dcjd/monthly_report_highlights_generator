@@ -138,7 +138,7 @@ if uploaded_file is not None:
     df4.drop(df4.columns[0], axis=1, inplace=True)
     df4.columns = header.values[0][np.where(header.values[0] == 'Hearing Reset Percentage')[0][0] + 2:-2]
 
-    df4 = df4.replace('-', np.nan)
+    df4 = df4.replace('-', np.nan).astype(float)
 
     df4.apply(lambda x: (round(x, 3) * 100))
 
@@ -270,7 +270,7 @@ if uploaded_file is not None:
     try:
         df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
     except KeyError:
-        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} Total', :]
 
     # Clinical Service Referral Outcomes
     df14 = pd.read_excel(uploaded_file, sheet_name=10).T
@@ -282,7 +282,7 @@ if uploaded_file is not None:
     try:
         df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
     except KeyError:
-        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} YTD Total', :]
+        df13 = df13.loc[:f'{fy_previous[:2] + fy_previous[-2:]} Total', :]
 
     # education
     df15 = pd.read_excel(uploaded_file, sheet_name=11, skiprows=4, usecols=list(range(2, 18))).T
@@ -653,20 +653,40 @@ if uploaded_file is not None:
             abs(round((df7.iloc[month_index_cur(), 13] / df7.iloc[month_index_prev(), 13] - 1) * 100)),
             report_month_prev()))
 
-    det_admissions_ytd_pct_change = round((((df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]) / (df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'Admissions')]) - 1) * 100))
+    try:
+        det_admissions_ytd_pct_change = round((((df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]) / (df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'Admissions')]) - 1) * 100))
+    except KeyError:
+        det_admissions_ytd_pct_change = round((((df7.loc[f'{fy_cur_short_abv()[:-4]} Total', ('Total', 'Admissions')]) / (
+        df7.loc[f'{fy_prev_short_abv()[:-4]} Total', ('Total', 'Admissions')]) - 1) * 100))
 
     if det_admissions_ytd_pct_change > 0:
-        det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% higher than the total admissions during the same months of the previous fiscal year.'.format(
-            int(df7.loc['FY22 Total', ('Total', 'Admissions')]),
-            month_index_cur()+1,
-            fy_current,
-            det_admissions_ytd_pct_change))
+        try:
+            det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% higher than the total admissions during the same months of the previous fiscal year.'.format(
+                int(df7.loc[f'{fy_prev_short_abv()[:-4]} Total', ('Total', 'Admissions')]),
+                month_index_cur()+1,
+                fy_current,
+                det_admissions_ytd_pct_change))
+        except:
+            det_admit_list.append(
+                'The {} total detention admissions through the first {} months of {} are {}% higher than the total admissions during the same months of the previous fiscal year.'.format(
+                    int(df7.loc[f'{fy_prev_short_abv()[:-4]} YTD Total', ('Total', 'Admissions')]),
+                    month_index_cur() + 1,
+                    fy_current,
+                    det_admissions_ytd_pct_change))
     else:
-        det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% lower than the total admissions during the same months of the previous fiscal year.'.format(
-            int(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]),
-            month_index_cur()+1,
-            fy_current,
-            abs(det_admissions_ytd_pct_change)))
+        try:
+            det_admit_list.append('The {} total detention admissions through the first {} months of {} are {}% lower than the total admissions during the same months of the previous fiscal year.'.format(
+                int(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'Admissions')]),
+                month_index_cur()+1,
+                fy_current,
+                abs(det_admissions_ytd_pct_change)))
+        except:
+            det_admit_list.append(
+                'The {} total detention admissions through the first {} months of {} are {}% lower than the total admissions during the same months of the previous fiscal year.'.format(
+                    int(df7.loc[f'{fy_cur_short_abv()} YTD Total', ('Total', 'Admissions')]),
+                    month_index_cur() + 1,
+                    fy_current,
+                    abs(det_admissions_ytd_pct_change)))
 
     st.write(' '.join(det_admit_list))
 
@@ -873,8 +893,12 @@ if uploaded_file is not None:
     #         pass
 
 
-
-    det_adp_ytd_pct_change = round_pct_change(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')], df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')])
+    try:
+        det_adp_ytd_pct_change = round_pct_change(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')],
+                                                  df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')])
+    except:
+        det_adp_ytd_pct_change = round_pct_change(df7.loc[f'{fy_cur_short_abv()[:-4]} Total', ('Total', 'ADP')],
+                                                  df7.loc[f'{fy_prev_short_abv()[:-4]} Total', ('Total', 'ADP')])
 
     detlist4 = []
 
