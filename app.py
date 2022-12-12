@@ -5,10 +5,6 @@ from datetime import datetime
 import math
 import inflect
 
-# fy22 = [('OCT 2021'), ('NOV 2021'), ('DEC 2021'), ('JAN 2022'), ('FEB 2022'), ('MAR 2022'), ('APR 2022'), ('MAY 2022'),
-#        ('JUN 2022'), ('JUL 2022'), ('AUG 2022'), ('September 2022')]
-
-
 def month_index_cur():
     ''' Return iloc for current report month'''
     # Oct. - Nov.
@@ -63,23 +59,6 @@ def fy_prev_short_abv():
         return fy_previous[:2] + fy_previous[-2:]
     else:
         return fy_previous[:2] + fy_previous[-2:] + ' YTD'
-
-# current = fy22[datetime.now().month + 1]
-# previous = fy22[datetime.now().month ]
-#
-# month = st.radio(
-#      "Select month for the report:",
-#      ('Latest Month ({})'.format(current), 'Previous Month ({})'.format(previous)))
-#
-#
-# if month == 'Latest Month ({})'.format(current):
-#     month_index_cur() = datetime.now().month + 1
-#     month_index_prev() = datetime.now().month
-#     st.write('You selected: report month ({}), previous month ({})'. format(report_month_cur(), report_month_prev()))
-# else:
-#     month_index_cur() = datetime.now().month
-#     month_index_prev() = datetime.now().month - 1
-#     st.write('You selected: report month ({}), previous month ({})'. format(report_month_cur(), report_month_prev()))
 
 st.write('Current report month: ',report_month_cur())
 
@@ -792,107 +771,6 @@ if uploaded_file is not None:
 
     st.write('\n')
 
-    # st.write('MONTH-TO-MONTH TOTAL')
-    # for i in range(12, 17):
-    #     try:
-    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
-    #             st.write('The total {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                           report_month_cur(),
-    #                                                                                           round((df7.iloc[month_index_cur(), i] / df7.iloc[ month_index_prev(), i] - 1)*100),
-    #                                                                                           report_month_prev(),
-    #                                                                                           (round(df7.iloc[month_index_cur(), i], 2)),
-    #                                                                                           (round(df7.iloc[month_index_prev(), i], 2))))
-    #         else:
-    #             st.write('The total {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                           report_month_cur(),
-    #                                                                                           round((df7.iloc[month_index_cur(), i] / df7.iloc[ month_index_prev(), i] - 1)*100),
-    #                                                                                           report_month_prev(),
-    #                                                                                           (round(df7.iloc[month_index_cur(), i], 2)),
-    #                                                                                           (round(df7.iloc[month_index_prev(), i], 2))))
-    #     except:
-    #         pass
-    #
-    # st.write('\n')
-    # st.write('MONTH-TO-MONTH MALE')
-    # for i in range(1, 5):
-    #     try:
-    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
-    #             st.write('The male {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                          report_month_cur(),
-    #                                                                                          math.trunc(round((df7.iloc[
-    #                                                                                                                month_index_cur(), i] /
-    #                                                                                                            df7.iloc[
-    #                                                                                                                month_index_prev(), i]) - 1,
-    #                                                                                                           2) * 100),
-    #                                                                                          report_month_prev(),
-    #                                                                                          (round(df7.iloc[
-    #                                                                                                               month_index_cur(), i],
-    #                                                                                                           2)),
-    #                                                                                          (round(df7.iloc[
-    #                                                                                                               month_index_prev(), i],
-    #                                                                                                           2))))
-    #         else:
-    #             st.write('The male {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                          report_month_cur(),
-    #                                                                                          math.trunc(round((df7.iloc[
-    #                                                                                                                month_index_cur(), i] /
-    #                                                                                                            df7.iloc[
-    #                                                                                                                month_index_prev(), i]) - 1,
-    #                                                                                                           2) * 100),
-    #                                                                                          report_month_prev(),
-    #                                                                                          (round(df7.iloc[
-    #                                                                                                               month_index_cur(), i],
-    #                                                                                                           2)),
-    #                                                                                          (round(df7.iloc[
-    #                                                                                                               month_index_prev(), i],
-    #                                                                                                           2))))
-    #     except:
-    #         pass
-    #
-    # st.write('\n')
-    # st.write('MONTH-TO-MONTH FEMALE')
-    # for i in range(6, 11):
-    #     try:
-    #         if (df7.iloc[month_index_cur(), i] / df7.iloc[month_index_prev(), i]) - 1 > 0:
-    #             st.write('The female {} in {} increased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                            report_month_cur(),
-    #                                                                                            math.trunc(round((
-    #                                                                                                                         df7.iloc[
-    #                                                                                                                             month_index_cur(), i] /
-    #                                                                                                                         df7.iloc[
-    #                                                                                                                             month_index_prev(), i]) - 1,
-    #                                                                                                             2) * 100),
-    #                                                                                            report_month_prev(),
-    #                                                                                            (round(
-    #                                                                                                df7.iloc[
-    #                                                                                                    month_index_cur(), i],
-    #                                                                                                2)),
-    #                                                                                            (round(
-    #                                                                                                df7.iloc[
-    #                                                                                                    month_index_prev(), i],
-    #                                                                                                2))))
-    #         else:
-    #             st.write('The female {} in {} decreased by {}% compared to {} ({} vs. {})'.format(df7.columns[i][1],
-    #                                                                                            report_month_cur(),
-    #                                                                                            math.trunc(round((
-    #                                                                                                                         df7.iloc[
-    #                                                                                                                             month_index_cur(), i] /
-    #                                                                                                                         df7.iloc[
-    #                                                                                                                             month_index_prev(), i]) - 1,
-    #                                                                                                             2) * 100),
-    #                                                                                            report_month_prev(),
-    #                                                                                            math.trunc(round(
-    #                                                                                                df7.iloc[
-    #                                                                                                    month_index_cur(), i],
-    #                                                                                                2)),
-    #                                                                                            math.trunc(round(
-    #                                                                                                df7.iloc[
-    #                                                                                                    month_index_prev(), i],
-    #                                                                                                2))))
-    #     except:
-    #         pass
-
-
     try:
         det_adp_ytd_pct_change = round_pct_change(df7.loc[f'{fy_cur_short_abv()} Total', ('Total', 'ADP')],
                                                   df7.loc[f'{fy_prev_short_abv()} Total', ('Total', 'ADP')])
@@ -1450,31 +1328,6 @@ if uploaded_file is not None:
     psych_prev = []
     psych_cur = []
 
-    # for i in range(0, df12.shape[1]):
-    #     try:
-    #         if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
-    #             st.write(
-    #                 '{}: {}% increase ({}: {} | {}: {})'.format(
-    #                     df12.columns[i],
-    #                     round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i]),
-    #                     fy_previous,
-    #                     round(df12.iloc[-1, i]),
-    #                     fy_current,
-    #                     round(df12.iloc[-2, i])
-    #                     ))
-    #         else:
-    #             st.write(
-    #                 '{}: {}% decrease ({}: {} | {}: {})'.format(
-    #                     df12.columns[i],
-    #                     round_pct_change(df12.iloc[-2, i], df12.iloc[-1, i]),
-    #                     fy_previous,
-    #                     round(df12.iloc[-1, i]),
-    #                     fy_current,
-    #                     round(df12.iloc[-2, i])
-    #                     ))
-    #     except ZeroDivisionError:
-    #         pass
-
     for i in range(0, df12.shape[1]):
         try:
             if (df12.iloc[-2, i] / df12.iloc[-1, i]) - 1 > 0:
@@ -1562,32 +1415,6 @@ if uploaded_file is not None:
 
     st.dataframe(pd.DataFrame(bh_ytd_dict))
 
-
-    # for i in range(0, df13.shape[1]):
-    #     try:
-    #
-    #         if (df13.iloc[-2, i] / df13.iloc[-1, i]) - 1 > 0:
-    #             st.write(
-    #                 '{} Referrals made through {} {} YTD were up {}% compared to {} YTD ({} vs. {}).'.format(
-    #                     df13.columns[i],
-    #                     report_month_cur(),
-    #                     fy_current,
-    #                     math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
-    #                     fy_previous,
-    #                     math.trunc(round(df13.iloc[-2, i], 2)),
-    #                     math.trunc(round(df13.iloc[-1, i], 2))))
-    #         else:
-    #             st.write(
-    #                 '{} Referrals made through {} {} YTD were down {}% compared to {} YTD ({} vs. {}).'.format(
-    #                     df13.columns[i],
-    #                     report_month_cur(),
-    #                     fy_current,
-    #                     math.trunc(round((df13.iloc[-2, i] / df13.iloc[-1, i]) - 1, 2) * 100),
-    #                     fy_previous,
-    #                     math.trunc(round(df13.iloc[-2, i], 2)),
-    #                     math.trunc(round(df13.iloc[-1, i], 2))))
-    #     except ZeroDivisionError:
-    #         pass
 
     st.write('\n')
     st.subheader('***Clinical Service Referral Outcomes YTD***')
@@ -1682,32 +1509,3 @@ if uploaded_file is not None:
     ed_ytd_dict['{}'.format(fy_current)] = ed_ytd_cur
 
     st.dataframe(pd.DataFrame(ed_ytd_dict))
-
-    # for i in range(0, 13):
-    #     try:
-    #         if (df15.iloc[-2, i] / df15.iloc[-1, i]) - 1 > 0:
-    #             st.write(
-    #                 '{}: {}% increase ({}: {} | {}: {})'.format(
-    #                     df15.columns[i],
-    #                     round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i]),
-    #                     fy_previous,
-    #                     round(df15.iloc[-1, i]),
-    #                     fy_current,
-    #                     round(df15.iloc[-2, i]),
-    #                 ))
-    #         else:
-    #             st.write(
-    #                 '{}: {}% decrease ({}: {} | {}: {})'.format(
-    #                     df15.columns[i],
-    #                     abs(round_pct_change(df15.iloc[-2, i], df15.iloc[-1, i])),
-    #                     fy_previous,
-    #                     round(df15.iloc[-1, i]),
-    #                     fy_current,
-    #                     round(df15.iloc[-2, i]),
-    #                 ))
-    #     except ZeroDivisionError:
-    #         pass
-
-
-
-
