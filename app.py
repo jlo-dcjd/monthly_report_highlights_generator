@@ -5,6 +5,9 @@ from datetime import datetime
 import math
 import inflect
 
+def round_pct_change(current, prev):
+    return round(((current / prev) - 1) * 100)
+
 def month_index_cur():
     ''' Return iloc for current report month'''
     # Oct. - Nov.
@@ -269,11 +272,6 @@ if uploaded_file is not None:
     header = df15.iloc[1]
     df15 = df15.iloc[2:, 1:-2]
     df15.columns = header.values[1:-2]
-
-
-    def round_pct_change(current, prev):
-        return round(((current / prev) - 1) * 100)
-
 
     # all refs (types)
     t_for_refs_ct = df.iloc[month_index_cur(), 2]
@@ -816,6 +814,7 @@ if uploaded_file is not None:
             p_list = []
             for i, j in zip(up[col1], up[col2]):
                 p_list.append('{} (up {}%),'.format(i, round(j * 100)))
+            p_list[-1] = 'and ' + p_list[-1][:-1] + '.'
             return st.write(' '.join(p_list))
 
         if dir == 'down':
@@ -823,6 +822,7 @@ if uploaded_file is not None:
             p_list = []
             for i, j in zip(down[col1], down[col2]):
                 p_list.append('{} (up {}%),'.format(i, round(j * 100)))
+            p_list[-1] = 'and ' + p_list[-1][:-1] + '.'
             return st.write(' '.join(p_list))
 
 
@@ -1112,12 +1112,14 @@ if uploaded_file is not None:
     # MTM
     int_pl = pd.DataFrame(int_pl_dict).sort_values(by='Placement Perc. Change (MTM)', ascending=False)
     int_pl_up = int_pl[int_pl['Placement Perc. Change (MTM)'] > 0]
-    int_pl_up_p = []
 
+    int_pl_up_p = []
     int_pl_up_p.append('In {}, the following facilities had an increase in their ADP compared to the previous month:'.format(report_month_cur()))
 
     for i, j in zip(int_pl_up['Placement'], int_pl_up['Placement Perc. Change (MTM)']):
         int_pl_up_p.append('{} (up {}%),'.format(i[:-5], round(j * 100)))
+
+    int_pl_up_p[-1] = 'and ' + int_pl_up_p[-1][:-1] + '.'
 
     st.write(' '.join(int_pl_up_p))
 
@@ -1128,6 +1130,8 @@ if uploaded_file is not None:
     int_pl_down_p.append('The following facilities saw a decrease in their ADP compared to the previous month:')
     for i, j in zip(int_pl_down['Placement'], int_pl_down['Placement Perc. Change (MTM)']):
         int_pl_down_p.append('{} (down {}%),'.format(i[:-5], round(j * 100)))
+
+    int_pl_down_p[-1] = 'and ' + int_pl_down_p[-1][:-1] + '.'
 
     st.write(' '.join(int_pl_down_p))
     st.write('---')
@@ -1177,6 +1181,7 @@ if uploaded_file is not None:
     for i, j in zip(int_pl_up2['Placement'], int_pl_up2['Placement Perc. Change (YTD)']):
         int_pl_up_p2.append('{} (up {}%),'.format(i[:-5], round(j * 100)))
 
+    int_pl_up_p2[-1] = 'and ' + int_pl_up_p2[-1][:-1] + '.'
     st.write(' '.join(int_pl_up_p2))
 
     # Internal Placement YTD decreases
@@ -1192,6 +1197,7 @@ if uploaded_file is not None:
     for i, j in zip(int_pl_down2['Placement'], int_pl_down2['Placement Perc. Change (YTD)']):
         int_pl_down_p2.append('{} (down {}%),'.format(i[:-5], abs(round(j * 100))))
 
+    int_pl_down_p2[-1] = 'and ' + int_pl_down_p2[-1][:-1] + '.'
     st.write(' '.join(int_pl_down_p2))
 
     st.write('---')
@@ -1222,9 +1228,10 @@ if uploaded_file is not None:
     for index, value in zip(new_youth_plc.index, new_youth_plc.values.flatten()):
         con_place_list.append(f'{p.number_to_words(value)} ({value}) youth were admitted to {index[:-14]}, ')
 
-    con_place_list.append(f'There were {p.number_to_words(df11.iloc[month_index_cur(), 2])} ({df11.iloc[month_index_cur(), 2]}) \
+    con_place_list.append(f'there were {p.number_to_words(df11.iloc[month_index_cur(), 2])} ({df11.iloc[month_index_cur(), 2]}) \
                             exits from contract placement facilities during {report_month_cur()}.')
 
+    con_place_list[-1] = 'and ' + con_place_list[-1][:-1] + '.'
     st.write(' '.join(con_place_list))
 
     con_place_list2 = []
@@ -1264,18 +1271,20 @@ if uploaded_file is not None:
                 p.number_to_words(df12.iloc[month_index_cur(), -1]).capitalize(),
                 df12.iloc[month_index_cur(), -1],
                 report_month_cur(),
-                math.trunc(round((df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1, 2) * 100),
+                round_pct_change(df12.iloc[month_index_cur(), -1], df12.iloc[month_index_prev(), -1]),
                 report_month_prev(),
                 math.trunc(round(df12.iloc[month_index_cur(), -1])),
                 math.trunc(round(df12.iloc[month_index_prev(), -1]))))
     else:
-        psych_list.append('({}) Psychological Services Referrals were made in {}, a {}% decrease compared to {} ({} vs. {})'.format(
-            df12.iloc[month_index_cur(), -1],
-            report_month_cur(),
-            math.trunc(round((df12.iloc[month_index_cur(), -1] / df12.iloc[month_index_prev(), -1]) - 1, 2) * 100),
-            report_month_prev(),
-            math.trunc(round(df12.iloc[month_index_cur(), -1])),
-            math.trunc(round(df12.iloc[month_index_prev(), -1]))))
+        psych_list.append(
+            '{} ({}) Psychological Services Referrals were made in {}, a {}% decrease compared to  {} ({} vs. {}).'.format(
+                p.number_to_words(df12.iloc[month_index_cur(), -1]).capitalize(),
+                df12.iloc[month_index_cur(), -1],
+                report_month_cur(),
+                abs(round_pct_change(df12.iloc[month_index_cur(), -1], df12.iloc[month_index_prev(), -1])),
+                report_month_prev(),
+                math.trunc(round(df12.iloc[month_index_cur(), -1])),
+                math.trunc(round(df12.iloc[month_index_prev(), -1]))))
 
     psych_list.append('The number of Psychological Service Referrals made')
     if month_index_cur() == 11:
@@ -1450,8 +1459,8 @@ if uploaded_file is not None:
 
     ed_list = []
 
-    ed_list.append(f'The Dallas County JJAEP had {p.number_to_words(int(df15.iloc[month_index_cur(), 4]))} admissions in {report_month_cur()}.')
-    ed_list.append(f'During the first {p.number_to_words(month_index_cur()+1)} months of the previous fiscal year, there were {p.number_to_words(int(df15.Admissions[-1]))} new JJAEP admissions.')
+    ed_list.append(f'The Dallas County JJAEP had {p.number_to_words(int(df15.iloc[month_index_cur(), 4]))} ({int(df15.iloc[month_index_cur(), 4])}) admissions in {report_month_cur()}.')
+    ed_list.append(f'During the first {p.number_to_words(month_index_cur()+1)} months of the previous fiscal year, there were {p.number_to_words(int(df15.Admissions[-1]))} ({int(df15.Admissions[-1])}) new JJAEP admissions.')
     st.write(' '.join(ed_list))
 
     ed_list2 = []
