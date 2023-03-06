@@ -479,7 +479,7 @@ if uploaded_file is not None:
     if mis_violent_22ytd_pct_chg > 0:
         ref_m_list_ytd.append('including an {}% increase in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
     else:
-        ref_m_list_ytd.append('including an {}% decrease in violent misdemeanors,'.format(mis_violent_22ytd_pct_chg))
+        ref_m_list_ytd.append('including an {}% decrease in violent misdemeanors,'.format(abs(mis_violent_22ytd_pct_chg)))
 
     if mis_vop_22ytd_pct_chg > 0:
         ref_m_list_ytd.append(
@@ -496,7 +496,7 @@ if uploaded_file is not None:
     if cins_22ytd_pct_chg > 0:
         ref_m_list_ytd.append('and a {}% more CINS other than status referrals in {}.'.format(cins_22ytd_pct_chg, fy_current))
     else:
-        ref_m_list_ytd.append('and a {}% more CINS other than status referrals in {}.'.format(cins_22ytd_pct_chg, fy_current))
+        ref_m_list_ytd.append('and a {}% fewer CINS other than status referrals in {}.'.format(abs(cins_22ytd_pct_chg), fy_current))
 
     st.write(' '.join(ref_m_list_ytd))
 
@@ -546,17 +546,20 @@ if uploaded_file is not None:
 
     st.write(' '.join(det_hear_list))
 
-
     # resets
+    total_reset_pct_column = df4.columns.get_loc('Total Reset Pct.')
+
     st.write('\n')
-    if round((df4.iloc[-2, 5]) *100) > round((df4.iloc[-1, 5]) *100):
+    if round((df4.iloc[-2, total_reset_pct_column]) * 100) > round((df4.iloc[-1, total_reset_pct_column]) * 100):
         st.write(
             'Court hearing resets are higher than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
-                round((df4.iloc[-2, 5]) * 100), fy_current, round((df4.iloc[-1, 5]) *100), month_index_cur() + 1, fy_previous))
+                round((df4.iloc[-2, total_reset_pct_column]) * 100), fy_current,
+                round((df4.iloc[-1, total_reset_pct_column]) * 100), month_index_cur() + 1, fy_previous))
     else:
         st.write(
             'Court hearing resets are lower than the previous fiscal year — {}% of court hearings being reset in {} year-to-date, compared to {}% of court hearings during the first {} months of {}.'.format(
-                round((df4.iloc[-2, 5]) * 100), fy_current, round((df4.iloc[-1, 5]) *100), month_index_cur() + 1, fy_previous))
+                round((df4.iloc[-2, total_reset_pct_column]) * 100), fy_current,
+                round((df4.iloc[-1, total_reset_pct_column]) * 100), month_index_cur() + 1, fy_previous))
 
 
     # Dispositions
